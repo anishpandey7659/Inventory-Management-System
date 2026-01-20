@@ -144,9 +144,9 @@ It provides quick answers and supports the following:
     │   └── ...
     └── README.md
 # 📸 Screenshots:
-![Dashboard](./screenshots/dashboard.png)
-![Dashboard](./screenshots/dashboard.png)
-![Dashboard](./screenshots/dashboard.png)
+![Dashboard](dashboard.png)
+![Dashboard](assest/Addproduct.png)
+![Dashboard](assest/report.png)
 
 # 🚧 Project Status
 
