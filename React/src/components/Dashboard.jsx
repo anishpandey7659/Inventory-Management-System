@@ -1,100 +1,116 @@
-import React, { useState ,useEffect} from 'react';
-import AddProductModal from './Addproduct';
-import { getProducts, deleteProduct } from '../Apiservice';
-import { FilterModal,buildFilterParams,ActionMenu } from './Func';
-import { useFetch } from '../UseHook';
-import { useCategories } from '../UseHook';
-
+import React, { useState, useEffect } from "react";
+import AddProductModal from "./Addproduct";
+import { getProducts, deleteProduct, updateProduct } from "../Apiservice";
+import { FilterModal, buildFilterParams, ActionMenu } from "./Func";
+import { useFetch } from "../UseHook";
+import { useCategories } from "../UseHook";
 
 const InventoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
-  const [searchTerm, setSearchTerm] = useState('');
+
+  const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFilteropen, setIsFilteropen] = useState(false);
+
   const [inventoryData, setInventoryData] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const totalPages = Math.ceil(totalCount / pageSize);
+
   const start = (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalCount);
-  const [search, setsearch] = useState({});
-  const { data: categories, loading, error } = useCategories();
-  const [Products, setProducts] = useState([]);
+
+  const { data: categories } = useCategories();
+
   const [filters, setFilters] = useState({
-    stock_status: '',
+    stock_status: "",
     category: [],
-    min_price: '',
-    max_price: '',
-    min_quantity:'',
-    max_quantity:'',
-    quantity_range: '',
-    ordering: '',
+    min_price: "",
+    max_price: "",
+    min_quantity: "",
+    max_quantity: "",
+    quantity_range: "",
+    ordering: "",
   });
-const handleDelete = async (itemId) => {
-  if (window.confirm('Are you sure you want to delete this product?')) {
+
+  const [modalMode, setModalMode] = useState("add");
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const fetchInventory = async (page = 1) => {
     try {
-      await deleteProduct(itemId);
-      // Refresh the inventory after deletion
-      fetchInventory(currentPage);
-      alert('Product deleted successfully!');
+      const response = await getProducts({}, page);
+      setTotalCount(response.data.count);
+
+      const data = response.data.results || response.data;
+
+      const mappedData = data.map((item) => ({
+        id: item.id,
+        name: item.product_name,
+        sku: item.sku,
+        category: item.category?.name || "Unknown",
+        Sp: item.selling_price,
+        Pp: item.purchase_price,
+        quantity: item.quantity,
+        status:
+          item.quantity === 0
+            ? "Out of Stock"
+            : item.quantity < 15
+              ? "Low Stock"
+              : "In Stock",
+      }));
+
+      setInventoryData(mappedData);
     } catch (error) {
-      console.error('Error deleting product:', error);
-      alert('Failed to delete product');
+      console.log(error.response?.data || error.message);
     }
-  }
-};
-const handleEdit = (itemId) => {
-  console.log('Edit item:', itemId);
-  // Add your edit logic here
-  // Example: Open edit modal with item data
-};
+  };
 
-   useEffect(() => {
+  useEffect(() => {
     fetchInventory(currentPage);
-    }, [currentPage]);
+  }, [currentPage]);
 
-  const fetchInventory = async (page) => {
-        try {
-        const response = await getProducts({ search }, page);
-        
-        setTotalCount(response.data.count);
-        const data = response.data.results || response.data;
+  const handleDelete = async (itemId) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        await deleteProduct(itemId);
+        fetchInventory(currentPage);
+        alert("Product deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        alert("Failed to delete product");
+      }
+    }
+  };
 
-        const mappedData = data.map(item => ({
-            id: item.id,
-            name: item.product_name,
-            sku: item.sku,
-            category: item.category?.name || "Unknown",
-            Sp: item.selling_price,
-            Pp: item.purchase_price,
-            quantity: item.quantity,
-            status: item.quantity === 0 ? "Out of Stock" : item.quantity < 15 ? "Low Stock" : "In Stock"
-        }));
+  const handleEdit = async (itemId) => {
+    try {
+      const response = await getProducts({}, 1);
+      const product = response.data.results.find((p) => p.id === itemId);
 
-        setInventoryData(mappedData);
-        } catch (error) {
-         console.log(error.response?.data || error.message);
-        }
-    };
+      setSelectedProduct(product);
+      setModalMode("edit");
+      setIsModalOpen(true);
+    } catch (error) {
+      console.log("Error fetching product for edit:", error);
+    }
+  };
 
-const defaultFilters = {
-  stock_status: '',
-  category: [],
-  min_price: '',
-  max_price: '',
-  min_quantity: '',
-  max_quantity: '',
-  quantity_range: '',
-  ordering: '',
-};
+  const defaultFilters = {
+    stock_status: "",
+    category: [],
+    min_price: "",
+    max_price: "",
+    min_quantity: "",
+    max_quantity: "",
+    quantity_range: "",
+    ordering: "",
+  };
 
-const clearFilters = () => {
-  setFilters(defaultFilters);
-  setCurrentPage(1);
-  fetchInventory(1); // fetch normal data
-};
-
-
+  const clearFilters = () => {
+    setFilters(defaultFilters);
+    setCurrentPage(1);
+    fetchInventory(1);
+  };
 
   const handleFilterApply = async (incomingFilters) => {
     const params = buildFilterParams(incomingFilters);
@@ -104,14 +120,13 @@ const clearFilters = () => {
 
       const data = response.data.results || response.data;
 
-      const mappedData = data.map(item => ({
+      const mappedData = data.map((item) => ({
         id: item.id,
         name: item.product_name,
         sku: item.sku,
         category: item.category?.name || "Unknown",
         Sp: item.selling_price,
         Pp: item.purchase_price,
-
         quantity: item.quantity,
         status:
           item.quantity === 0
@@ -123,382 +138,199 @@ const clearFilters = () => {
 
       setInventoryData(mappedData);
       setTotalCount(response.data.count);
-      setCurrentPage(1);  // reset page to 1
-      console.log("Filter params:", params);
+      setCurrentPage(1);
     } catch (error) {
-      console.log("Filter params:", params);
       console.log("Error:", error);
     }
   };
 
-
-
-
   const getStatusColor = (status) => {
-    if (status === 'In Stock') return '#10b981';
-    if (status === 'Low Stock') return '#f59e0b';
-    if (status === 'Out of Stock') return '#ef4444';
-    return '#6b7280';
+    if (status === "In Stock") return "text-green-500";
+    if (status === "Low Stock") return "text-amber-500";
+    if (status === "Out of Stock") return "text-red-500";
+    return "text-gray-500";
   };
 
   const getQuantityColor = (quantity) => {
-    if (quantity === 0) return '#ef4444';
-    if (quantity < 15) return '#f59e0b';
-    return '#1f2937';
+    if (quantity === 0) return "text-red-500";
+    if (quantity < 15) return "text-amber-500";
+    return "text-gray-800";
   };
 
   return (
-    <div style={{ padding: '14px', background: '#f9fafb', minHeight: '100vh' }}>
-      
-      {/* Header Section */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '14px'
-      }}>
-        
-        {/* Search Box */}
-        <div style={{ position: 'relative', width: '400px' }}>
-          <span style={{
-            position: 'absolute',
-            left: '14px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            color: '#9ca3af',
-            fontSize: '18px'
-          }}>🔍</span>
+    <div className="p-3.5 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center mb-3.5">
+        <div className="relative w-96">
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+            🔍
+          </span>
           <input
             type="text"
             placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px 16px 12px 42px',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              outline: 'none',
-              fontSize: '14px',
-              background: 'white'
-            }}
+            className="w-full py-3 px-3.5 pl-11 rounded-lg border border-gray-200 outline-none text-sm bg-white"
           />
         </div>
 
-        {/* Action Buttons */}
-        <div  style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={()=>setIsFilteropen(true)} style={{
-            padding: '10px 20px',
-            background: 'white',
-            border: '1px solid #e5e7eb',
-            borderRadius: '8px',
-            color: '#374151',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <span>🔽</span>
-            Filter
+        <div className="flex gap-3">
+          <button 
+            onClick={() => setIsFilteropen(true)} 
+            className="py-2.5 px-5 bg-white border border-gray-200 rounded-lg text-gray-700 text-sm font-medium cursor-pointer flex items-center gap-2"
+          >
+            <span>🔽</span>Filter
           </button>
+          
           <FilterModal
-          isOpen={isFilteropen} onClose={()=>setIsFilteropen(false)}
-          categories={categories} onApplyFilter={handleFilterApply}
-      
+            isOpen={isFilteropen}
+            onClose={() => setIsFilteropen(false)}
+            categories={categories}
+            onApplyFilter={handleFilterApply}
           />
-          <button onClick={clearFilters} style={{
-            padding: '10px 20px',
-            background: 'white',
-            border: '1px solid #e5e7eb',
-            borderRadius: '8px',
-            color: '#374151',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer',  
-          }}>
+          
+          <button 
+            onClick={clearFilters}
+            className="py-2.5 px-5 bg-white border border-gray-200 rounded-lg text-gray-700 text-sm font-medium cursor-pointer"
+          >
             Clear Filters
           </button>
 
-
-
-          
-          <button  onClick={() => setIsModalOpen(true)}
-           style={{
-            padding: '10px 20px',
-            background: '#3b82f6',
-            border: 'none',
-            borderRadius: '8px',
-            color: 'white',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <span style={{ fontSize: '16px' }}>+</span>
-            Add Product
+          <button 
+            onClick={() => {
+              setModalMode("add");
+              setSelectedProduct(null);
+              setIsModalOpen(true);
+            }} 
+            className="py-2.5 px-5 bg-white border border-gray-200 rounded-lg text-gray-700 text-sm font-medium cursor-pointer"
+          >
+            + Add Product
           </button>
-          <AddProductModal 
-        isOpen={isModalOpen} head="Add New Product"
-        onClose={() => setIsModalOpen(false)} 
-      />
+
+          <AddProductModal
+            isOpen={isModalOpen}
+            head={modalMode === "edit" ? "Edit Product" : "Add New Product"}
+            onClose={() => {
+              setIsModalOpen(false);
+              setSelectedProduct(null);
+            }}
+            mode={modalMode}
+            product={selectedProduct}
+          />
         </div>
       </div>
 
-      {/* Table Container */}
-      <div style={{
-        background: 'white',
-        borderRadius: '12px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        overflow: 'hidden'
-      }}>
-        
-        {/* Table */}
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse'
-        }}>
-          
-          {/* Table Header */}
+      {/* Table */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <table className="w-full border-collapse">
           <thead>
-            <tr style={{  background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-              <th style={{
-                padding: '16px 24px',
-                textAlign: 'left',
-                fontSize: '12px',
-                fontWeight: '600',
-                color: '#6b7280',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>PRODUCT NAME</th>
-              <th style={{
-                padding: '16px 24px',
-                textAlign: 'left',
-                fontSize: '12px',
-                fontWeight: '600',
-                color: '#6b7280',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>SKU</th>
-              <th style={{
-                padding: '16px 24px',
-                textAlign: 'left',
-                fontSize: '12px',
-                fontWeight: '600',
-                color: '#6b7280',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>CATEGORY</th>
-              <th style={{
-                padding: '16px 24px',
-                textAlign: 'left',
-                fontSize: '12px',
-                fontWeight: '600',
-                color: '#6b7280',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                Selling Price</th>
-              <th style={{
-                padding: '16px 24px',
-                textAlign: 'left',
-                fontSize: '12px',
-                fontWeight: '600',
-                color: '#6b7280',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                Purchase Price</th>
-              <th style={{
-                padding: '16px 24px',
-                textAlign: 'left',
-                fontSize: '12px',
-                fontWeight: '600',
-                color: '#6b7280',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                
-                QUANTITY</th>
-              <th style={{
-                padding: '16px 24px',
-                textAlign: 'left',
-                fontSize: '12px',
-                fontWeight: '600',
-                color: '#6b7280',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>STATUS</th>
-              <th style={{
-                padding: '16px 24px',
-                textAlign: 'left',
-                fontSize: '12px',
-                fontWeight: '600',
-                color: '#6b7280',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>ACTIONS</th>
+            <tr className="bg-gray-50 border-b border-gray-200">
+              <th className="py-4 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                PRODUCT NAME
+              </th>
+              <th className="py-4 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                SKU
+              </th>
+              <th className="py-4 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                CATEGORY
+              </th>
+              <th className="py-4 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Selling Price
+              </th>
+              <th className="py-4 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Purchase Price
+              </th>
+              <th className="py-4 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                QUANTITY
+              </th>
+              <th className="py-4 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                STATUS
+              </th>
+              <th className="py-4 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                ACTIONS
+              </th>
             </tr>
           </thead>
-
-          {/* Table Body */}
+          
           <tbody>
-            {inventoryData.map((item, index) => (
-              <tr key={item.id} style={{
-                borderBottom: '1px solid #e5e7eb',
-                transition: 'background 0.2s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+            {inventoryData.map((item) => (
+              <tr 
+                key={item.id} 
+                className="border-b border-gray-200 transition-colors hover:bg-gray-50"
               >
-                <td style={{
-                  padding: '16px 24px',
-                  fontSize: '14px',
-                  color: '#1f2937',
-                  fontWeight: '500'
-                }}>{item.name}</td>
-                
-                <td style={{
-                  padding: '16px 24px',
-                  fontSize: '14px',
-                  color: '#6b7280'
-                }}>{item.sku}</td>
-                
-                <td style={{ padding: '16px 24px' }}>
-                  <span style={{
-                    padding: '4px 12px',
-                    background: '#f3f4f6',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                    color: '#4b5563'
-                  }}>{item.category}</span>
+                <td className="py-4 px-6 text-sm text-gray-800 font-medium">
+                  {item.name}
                 </td>
-                
-                <td style={{
-                  padding: '16px 24px',
-                  fontSize: '14px',
-                  color: '#1f2937',
-                  fontWeight: '500'
-                }}>${item.Sp}</td>
-                
-                <td style={{
-                  padding: '16px 24px',
-                  fontSize: '14px',
-                  color: '#1f2937',
-                  fontWeight: '500'
-                }}>${item.Pp}</td>
-                
-                <td style={{
-                  padding: '16px 24px',
-                  fontSize: '14px',
-                  color: getQuantityColor(item.quantity),
-                  fontWeight: item.quantity < 15 ? '600' : '400'
-                }}>{item.quantity}</td>
-                
-                <td style={{ padding: '16px 24px' }}>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    fontSize: '13px',
-                    color: getStatusColor(item.status),
-                    fontWeight: '500'
-                  }}>
-                    <span style={{
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '50%',
-                      background: getStatusColor(item.status)
-                    }}></span>
+                <td className="py-4 px-6 text-sm text-gray-500">
+                  {item.sku}
+                </td>
+                <td className="py-4 px-6">
+                  <span className="py-1 px-3 bg-gray-100 rounded-md text-xs text-gray-600">
+                    {item.category}
+                  </span>
+                </td>
+                <td className="py-4 px-6 text-sm text-gray-800 font-medium">
+                  ${item.Sp}
+                </td>
+                <td className="py-4 px-6 text-sm text-gray-800 font-medium">
+                  ${item.Pp}
+                </td>
+                <td className={`py-4 px-6 text-sm ${item.quantity < 15 ? 'font-semibold' : 'font-normal'} ${getQuantityColor(item.quantity)}`}>
+                  {item.quantity}
+                </td>
+                <td className="py-4 px-6">
+                  <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${getStatusColor(item.status)}`}>
                     {item.status}
                   </span>
                 </td>
-                
-                <td style={{ padding: '16px 24px' }}>
-                <ActionMenu 
-                  itemId={item.id}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              </td>
+                <td className="py-4 px-6">
+                  <ActionMenu
+                    itemId={item.id}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        {/* Pagination Footer */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '16px 24px',
-          borderTop: '1px solid #e5e7eb'
-          }}>
-          <span style={{
-            fontSize: '14px',
-            color: '#6b7280'
-          }}>Showing {start} – {end} of {totalCount} entries</span>
+        {/* Pagination */}
+        <div className="flex justify-between py-4 px-6 border-t border-gray-200">
+          <span>Showing {start} – {end} of {totalCount} entries</span>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {/* Prev */}
+          <div className="flex gap-2">
             <button 
-              disabled={currentPage === 1}
+              disabled={currentPage === 1} 
               onClick={() => setCurrentPage(p => p - 1)}
-              style={{
-              padding: '8px 16px',
-              background: 'white',
-              border: '1px solid #e5e7eb',
-              borderRadius: '6px',
-              color: '#6b7280',
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}>
+              className="py-2 px-4 bg-white border border-gray-200 rounded-md text-gray-500 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Prev
             </button>
             
-            {/* Page Numbers */}
             {[...Array(totalPages || 0)].map((_, index) => {
               const page = index + 1;
               return (
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  style={{
-                    padding: '8px 16px',
-                    background: currentPage === page ? '#3b82f6' : 'white',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '6px',
-                    color: currentPage === page ? 'white' : '#6b7280',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
+                  className={`py-2 px-4 border border-gray-200 rounded-md text-sm font-medium cursor-pointer ${
+                    currentPage === page 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-white text-gray-500'
+                  }`}
                 >
                   {page}
                 </button>
               );
             })}
             
-          {/* Next */}
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(p => p + 1)}
-            style={{
-              padding: '8px 16px',
-              background: 'white',
-              border: '1px solid #e5e7eb',
-              borderRadius: '6px',
-              color: '#6b7280',
-              fontSize: '14px',
-              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-              opacity: currentPage === totalPages ? 0.5 : 1
-            }}
-          >
-            Next
-          </button>
+            <button 
+              disabled={currentPage === totalPages} 
+              onClick={() => setCurrentPage(p => p + 1)}
+              className="py-2 px-4 bg-white border border-gray-200 rounded-md text-gray-500 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>

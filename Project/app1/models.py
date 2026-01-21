@@ -48,6 +48,7 @@ class StockIn(models.Model):
 
 
 class StockOut(models.Model):
+    customer_name = models.CharField(max_length=50, default="Unknown")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     date = models.DateTimeField(auto_now_add=True)
@@ -55,6 +56,27 @@ class StockOut(models.Model):
     def save(self, *args, **kwargs):
         if self.quantity >self.product.quantity:
             raise ValueError("Not enough stock!")
+        self.product.quantity -= self.quantity
+        self.product.save()
+        super().save(*args, **kwargs)
+
+class Sale(models.Model):
+    customer_name = models.CharField(max_length=50)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Sale #{self.id} - {self.customer_name}"
+
+
+class SaleItem(models.Model):
+    sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+
+    def save(self, *args, **kwargs):
+        if self.quantity > self.product.quantity:
+            raise ValueError("Not enough stock!")
+
         self.product.quantity -= self.quantity
         self.product.save()
         super().save(*args, **kwargs)

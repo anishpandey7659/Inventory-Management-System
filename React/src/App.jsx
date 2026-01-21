@@ -4,6 +4,7 @@ import Dashboard from "./components/Dashboard"
 import Add from './components/Addproduct'
 import ProductList from './components/ProductList'
 import { FilterModal } from './components/Func'
+import BillingPage from './components/Billingpage'
 
 
 function App() {
@@ -13,9 +14,10 @@ function App() {
     <>
     {/* <FilterModal /> */}
     {/* <Testfilter /> */}
-     <Navbar>
-    <Dashboard/>
-    </Navbar> 
+       <Navbar>
+    {/* <Dashboard/> */}
+    <BillingPage />
+    </Navbar>  
     </>
   )
 }

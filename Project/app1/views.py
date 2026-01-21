@@ -1,7 +1,7 @@
 from django.http import HttpResponse
-from .models import Product,Category,Supplier,StockOut,StockIn
+from .models import Product,Category,Supplier,StockOut,StockIn,Sale
 from rest_framework import viewsets
-from .serializers import ProductSerializer,CategorySerializer,SupplierSerializer,StockOutSerializer,StockInSerializer
+from .serializers import ProductSerializer,CategorySerializer,SupplierSerializer,StockOutSerializer,StockInSerializer,SaleSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProductFilter,StockInFilter,StockOutFilter
 from rest_framework.filters import SearchFilter
@@ -42,6 +42,10 @@ class StockInViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend,SearchFilter]
     filterset_class = StockInFilter
     search_fields = ['product__product_name','supplier__name']
+
+class SaleViewSet(viewsets.ModelViewSet):
+    queryset = Sale.objects.all().prefetch_related("items")
+    serializer_class = SaleSerializer
 
 
 

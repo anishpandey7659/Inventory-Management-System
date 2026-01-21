@@ -8,289 +8,135 @@ const Layout = ({ children }) => {
     { name: 'Dashboard', icon: '📊' },
     { name: 'Inventory', icon: '📦' },
     { name: 'Orders', icon: '🛒' },
-    { name: 'Reports', icon: '📄' }
+    { name: 'Reports', icon: '📄' },
+    { name: 'Chatbot', icon: '🤖' }
   ];
 
-  return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+return (
+  <div className="flex h-screen overflow-hidden">
+    
+    {/* Sidebar */}
+    <div 
+      className={`h-screen bg-slate-800 flex flex-col justify-between transition-all duration-300 overflow-hidden ${
+        sidebarOpen ? 'w-[250px] px-0 py-5' : 'w-0 p-0'
+      }`}
+    >
       
-      {/* Sidebar */}
-      <div style={{
-        width: sidebarOpen ? '250px' : '0',
-        height: '100vh',
-        background: '#1e293b',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        padding: sidebarOpen ? '20px 0' : '0',
-        transition: 'all 0.3s',
-        overflow: 'hidden'
-      }}>
-        
-        {/* Top Section */}
-        <div>
-          {/* Logo/Brand */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '0 24px',
-            marginBottom: '40px'
-          }}>
-            <div style={{
-              width: '36px',
-              height: '30px',
-              background: '#3b82f6',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px'
-            }}>
-              📦
-            </div>
-            <h2 style={{
-              color: 'white',
-              margin: 0,
-              fontSize: '22px',
-              fontWeight: '700',
-              letterSpacing: '0.5px'
-            }}>INVENTO</h2>
+      {/* Top Section */}
+      <div>
+        {/* Logo/Brand */}
+        <div className="flex items-center gap-3 px-6 mb-10">
+          <div className="w-9 h-[30px] bg-blue-500 rounded-lg flex items-center justify-center text-xl">
+            📦
           </div>
-
-          {/* Menu Items */}
-          <nav style={{ padding: '0 10px' }}>
-            {menuItems.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => setActiveItem(item.name)}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '14px',
-                  padding: '14px 16px',
-                  marginBottom: '8px',
-                  background: activeItem === item.name ? '#334155' : 'transparent',
-                  border: 'none',
-                  borderRadius: '10px',
-                  color: activeItem === item.name ? '#60a5fa' : '#94a3b8',
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  textAlign: 'left'
-                }}
-                onMouseEnter={(e) => {
-                  if (activeItem !== item.name) {
-                    e.currentTarget.style.background = '#2d3748';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (activeItem !== item.name) {
-                    e.currentTarget.style.background = 'transparent';
-                  }
-                }}
-              >
-                <span style={{ fontSize: '20px' }}>{item.icon}</span>
-                <span>{item.name}</span>
-              </button>
-            ))}
-          </nav>
+          <h2 className="text-white m-0 text-[22px] font-bold tracking-wide">
+            INVENTO
+          </h2>
         </div>
 
-        {/* Bottom Section - Logout */}
-        <div style={{ padding: '0 16px' }}>
-          <button style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '14px',
-            padding: '14px 16px',
-            background: 'transparent',
-            border: 'none',
-            borderRadius: '10px',
-            color: '#94a3b8',
-            fontSize: '16px',
-            fontWeight: '500',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#2d3748';
-            e.currentTarget.style.color = '#f87171';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = '#94a3b8';
-          }}
-          >
-            <span style={{ fontSize: '20px' }}>🚪</span>
-            <span>Logout</span>
-          </button>
-        </div>
+        {/* Menu Items */}
+        <nav className="px-2.5">
+          {menuItems.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => setActiveItem(item.name)}
+              className={`w-full flex items-center gap-3.5 py-3.5 px-4 mb-2 border-none rounded-[10px] text-base font-medium cursor-pointer transition-all duration-200 text-left ${
+                activeItem === item.name
+                  ? 'bg-slate-700 text-blue-400'
+                  : 'bg-transparent text-slate-400 hover:bg-gray-700'
+              }`}
+            >
+              <span className="text-xl">{item.icon}</span>
+              <span>{item.name}</span>
+            </button>
+          ))}
+        </nav>
       </div>
 
-      {/* Main Content Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        
-        {/* Navbar */}
-        <nav style={{
-          background: '#f4f1f1',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
-          borderBottom: '1px solid #e5e7eb',
-          zIndex: 10
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '10px 20px'
-          }}>
-            
-            {/* Left Section - Menu & Dashboard Title */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <button 
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#1f2937',
-                  padding: '8px',
-                  cursor: 'pointer',
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                <span style={{ fontSize: '24px' }}>☰</span>
-              </button>
-              <h2 style={{ 
-                color: '#1f2937', 
-                margin: 0,
-                fontSize: '28px',
-                fontWeight: '600'
-              }}>Dashboard</h2>
-            </div>
-
-            {/* Right Section - Search, Notification & Profile */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-              
-              {/* Search Bar */}
-              <div style={{ position: 'relative' }}>
-                <span style={{
-                  position: 'absolute',
-                  left: '14px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: '#9ca3af',
-                  fontSize: '18px'
-                }}>🔍</span>
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  style={{
-                    width: '320px',
-                    padding: '10px 16px 10px 42px',
-                    borderRadius: '20px',
-                    border: '1px solid #e5e7eb',
-                    outline: 'none',
-                    fontSize: '14px',
-                    color: '#6b7280',
-                    background: '#f9fafb'
-                  }}
-                  onFocus={(e) => e.target.style.border = '1px solid #3b82f6'}
-                  onBlur={(e) => e.target.style.border = '1px solid #e5e7eb'}
-                />
-              </div>
-
-              {/* Notification Button */}
-              <button style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#6b7280',
-                padding: '8px',
-                cursor: 'pointer',
-                borderRadius: '8px',
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <span style={{ fontSize: '18px' }}>🔔</span>
-                <span style={{
-                  position: 'absolute',
-                  top: '6px',
-                  right: '6px',
-                  width: '8px',
-                  height: '8px',
-                  background: '#ef4444',
-                  borderRadius: '50%',
-                  border: '2px solid white'
-                }}></span>
-              </button>
-
-              {/* Profile */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                cursor: 'pointer',
-                padding: '6px 12px',
-                borderRadius: '9px',
-                transition: 'background 0.2s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-              >
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  background: '#0ea5e9',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontWeight: '600',
-                  fontSize: '15px'
-                }}>
-                  AU
-                </div>
-                <div style={{ textAlign: 'left' }}>
-                  <p style={{ 
-                    color: '#1f2937', 
-                    margin: 0, 
-                    fontSize: '15px',
-                    fontWeight: '500'
-                  }}>Admin User</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </nav>
-
-        {/* Page Content */}
-        <div style={{
-          flex: 1,
-          overflow: 'auto',
-          background: '#f9fafb',
-          padding: '1px'
-        }}>
-          {children || (
-            <div>
-              <h3 style={{ color: '#1f2937', fontSize: '20px', marginBottom: '16px' }}>
-                Welcome to Dashboard
-              </h3>
-              <p style={{ color: '#6b7280' }}>
-                Your content goes here...
-              </p>
-            </div>
-          )}
-        </div>
+      {/* Bottom Section - Logout */}
+      <div className="px-4">
+        <button 
+          className="w-full flex items-center gap-3.5 py-3.5 px-4 bg-transparent border-none rounded-[10px] text-slate-400 text-base font-medium cursor-pointer transition-all duration-200 hover:bg-gray-700 hover:text-red-400"
+        >
+          <span className="text-xl">🚪</span>
+          <span>Logout</span>
+        </button>
       </div>
     </div>
-  );
-};
 
+    {/* Main Content Area */}
+    <div className="flex-1 flex flex-col overflow-hidden">
+      
+      {/* Navbar */}
+      <nav className="bg-[#f4f1f1] shadow-sm border-b border-gray-200 z-10">
+        <div className="flex items-center justify-between py-2.5 px-5">
+          
+          {/* Left Section - Menu & Dashboard Title */}
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="bg-transparent border-none text-gray-800 p-2 cursor-pointer rounded-lg flex items-center hover:bg-gray-200"
+            >
+              <span className="text-2xl">☰</span>
+            </button>
+            <h2 className="text-gray-800 m-0 text-[28px] font-semibold">
+              Dashboard
+            </h2>
+          </div>
+
+          {/* Right Section - Search, Notification & Profile */}
+          <div className="flex items-center gap-5">
+            
+            {/* Search Bar */}
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                🔍
+              </span>
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-80 py-2.5 px-5 pl-[42px] rounded-[20px] border border-gray-200 outline-none text-sm text-gray-500 bg-gray-50 focus:border-blue-500"
+              />
+            </div>
+
+            {/* Notification Button */}
+            <button className="bg-transparent border-none text-gray-500 p-2 cursor-pointer rounded-lg relative flex items-center justify-center hover:bg-gray-100">
+              <span className="text-lg">🔔</span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            </button>
+
+            {/* Profile */}
+            <div 
+              className="flex items-center gap-3 cursor-pointer py-1.5 px-3 rounded-[9px] transition-colors hover:bg-gray-100"
+            >
+              <div className="w-10 h-10 rounded-full bg-sky-500 flex items-center justify-center text-white font-semibold text-[15px]">
+                AU
+              </div>
+              <div className="text-left">
+                <p className="text-gray-800 m-0 text-[15px] font-medium">
+                  Admin User
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Page Content */}
+      <div className="flex-1 overflow-auto bg-gray-50 p-px">
+        {children || (
+          <div>
+            <h3 className="text-gray-800 text-xl mb-4">
+              Welcome to Dashboard
+            </h3>
+            <p className="text-gray-500">
+              Your content goes here...
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+);
+}
 export default Layout;

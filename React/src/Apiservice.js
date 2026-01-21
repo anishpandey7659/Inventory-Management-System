@@ -11,16 +11,21 @@ const api = axios.create({
 });
 
 // Products
-// Products (with pagination + search support)
-// export const getProducts = (filters = {}, page = 1,search = '') =>
-//   api.get('/products/', {
-//     params: {
-//       page,
-//       // page_size,
-//       search,
-//       ...filters,
-//     }
-//   });
+const buildQueryParams = (filters) => {
+  return Object.fromEntries(
+    Object.entries(filters).filter(([_, value]) => value !== '' && value !== null)
+  );
+};
+export const getProducts = (filters = {}, page = 1) => {
+  const params = buildQueryParams(filters);
+
+  return api.get('/products/', {
+    params: {
+      page,
+      ...params,
+    },
+  });
+};
 
 export const getProduct = (id) => api.get(`/products/${id}/`);
 export const createProduct = (data) => api.post('/products/', data);
@@ -45,20 +50,11 @@ export const getStockOuts = (params) => api.get('/stockout/', { params });
 export const createStockOut = (data) => api.post('/stockout/', data);
 
 
+export const createsales = (data) => api.get('/sales/',data);
+
+
+
+
 export default api;
 
-const buildQueryParams = (filters) => {
-  return Object.fromEntries(
-    Object.entries(filters).filter(([_, value]) => value !== '' && value !== null)
-  );
-};
-export const getProducts = (filters = {}, page = 1) => {
-  const params = buildQueryParams(filters);
 
-  return api.get('/products/', {
-    params: {
-      page,
-      ...params,
-    },
-  });
-};
