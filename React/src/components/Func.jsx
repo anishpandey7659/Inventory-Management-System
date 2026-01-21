@@ -346,35 +346,48 @@ export const CreateSupplierModal = ({ isOpen, onClose, onSave }) => {
   );
 };
 
-const buildQueryParams = (filters) => {
-  const params = new URLSearchParams();
+export const buildFilterParams = (filters) => {
+  const params = {};
 
-  if (filters.stock_status)
-    params.append('stock_status', filters.stock_status);
+  // status (array → comma separated)
+  if (filters.status?.length) {
+    params.status = filters.status.join(',');
+  }
 
-  if (filters.category.length)
-    params.append('category', filters.category.join(','));
+  // categories (objects → ids)
+  if (filters.categories?.length) {
+    params.category = filters.categories.map(c => c.id).join(',');
+  }
 
-  if (filters.min_price)
-    params.append('min_price', filters.min_price);
+  // price range
+  if (filters.priceRange?.min) {
+    params.min_price = filters.priceRange.min;
+  }
+  if (filters.priceRange?.max) {
+    params.max_price = filters.priceRange.max;
+  }
 
-  if (filters.max_price)
-    params.append('max_price', filters.max_price);
+  // quantity filter
+  if (filters.quantityFilter) {
+    params.quantity_range = filters.quantityFilter;
+  }
+  if (filters.ordering) {
+    params.ordering = filters.ordering;
+  }
 
-  if (filters.quantity_range)
-    params.append('quantity_range', filters.quantity_range);
-
-  if (filters.ordering)
-    params.append('ordering', filters.ordering);
-
-  return params.toString();
+  return params;
 };
 
 
-// testfilter
-import { getProducts } from "../Apiservice";
 
-export function Testfilter() {
+// UI #################################################################################
+
+export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
+  const [Selectedorder, setSelectedorder] = useState([]);
+  const [SelectedCategories, setSelectedCategories] = useState([]);
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+  const [quantityFilter, setQuantityFilter] = useState('');
+  const [ordering, setOrdering] = useState('');
   const [Products, setProducts] = useState([]);
   const [filters, setFilters] = useState({
     stock_status: '',
@@ -387,131 +400,7 @@ export function Testfilter() {
     ordering: '',
   });
 
-const fetchProducts = async () => {
-  try {
-    const cleanFilters = Object.fromEntries(
-      Object.entries(filters).filter(([_, value]) => {
-        if (value === "" || value === null || value === undefined) return false;
-        if (Array.isArray(value) && value.length === 0) return false;
-        return true;
-      })
-    );
-
-    const res = await getProducts(cleanFilters);
-    setProducts(res.data.results);
-    console.log(res.data.results);
-  } catch (err) {
-    console.log("Error:", err);
-  }
-};
-
-
-  return (
-    <>
-      <h1>The Test version of Filter</h1>
-
-      <h2>Min_price</h2>
-      <form>
-        <input
-          type="number"
-          placeholder="Min"
-          onChange={e => setFilters({ ...filters, min_price: e.target.value })}
-        />
-
-        <h2>Max_price</h2>
-        <input
-          type="number"
-          placeholder="Max"
-          onChange={e => setFilters({ ...filters, max_price: e.target.value })}
-        />
-
-        <h2>Ordering price and quality</h2>
-      <select onChange={e => setFilters({ ...filters, ordering: e.target.value })}>
-        <option value="">Default</option>
-        <option value="selling_price">Selling Price ↑</option>
-        <option value="-selling_price">Selling Price ↓</option>
-        <option value="purchase_price">Purchase Price ↑</option>
-        <option value="-purchase_price">Purchase Price ↓</option>
-        <option value="quantity">Quantity ↑</option>
-        <option value="-quantity">Quantity ↓</option>
-      </select>
-
-
-        <h2>Qualty range</h2>
-      <select
-        onChange={(e) => {
-          const range = e.target.value;
-
-          if (range === "low") {
-            setFilters({
-              ...filters,
-              min_quantity: 1,
-              max_quantity: 50,
-              quantity_range: range,
-            });
-          } else if (range === "medium") {
-            setFilters({
-              ...filters,
-              min_quantity: 51,
-              max_quantity: 100,
-              quantity_range: range,
-            });
-          } else if (range === "high") {
-            setFilters({
-              ...filters,
-              min_quantity: 101,
-              max_quantity: "",
-              quantity_range: range,
-            });
-          } else {
-            // All range selected
-            setFilters({
-              ...filters,
-              min_quantity: "",
-              max_quantity: "",
-              quantity_range: "",
-            });
-          }
-        }}
-      >
-        <option value="">All</option>
-        <option value="low">Low (1–50)</option>
-        <option value="medium">Medium (51–100)</option>
-        <option value="high">High (100+)</option>
-      </select>
-
-
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            fetchProducts();
-          }}
-        >
-          Apply Filters
-        </button>
-      </form>
-        <h1>Filter data</h1>
-          {Products.map((item) => (
-          <div key={item.id}>
-            <h3>{item.product_name}</h3>
-            <p>purchase_price: {item.purchase_price},selling_price:{item.selling_price},category :{item.category.name},Quality:{item.quantity}</p>
-          </div>
-        ))}
-
-    </>
-  );
-}
-
-
-// UI
-
-export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
-  const [selectedStatus, setSelectedStatus] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
-  const [quantityFilter, setQuantityFilter] = useState('');
-
-  const statusOptions = ['In Stock', 'Low Stock', 'Out of Stock'];
+  const orderOptions = ['selling_price', '-selling_price', 'purchase_price','-purchase_price','quantity','-quantity'];
   
   const quantityRanges = [
     { label: 'All Quantities', value: '' },
@@ -521,8 +410,18 @@ export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
     { label: 'High (> 100)', value: 'high' }
   ];
 
-  const handleStatusToggle = (status) => {
-    setSelectedStatus(prev => 
+  const ordeingValue= [
+    { label: 'Default', value: '' },
+    { label: 'Selling Price (Asc)↑', value: 'selling_price' },
+    { label: 'Selling Price (desc) ↓', value: '-selling_price' },
+    { label: 'Purchase Price (Asc) ↑', value: 'purchase_price' },
+    { label: 'Purchase Price (desc) ↓', value: '-purchase_price' },
+    { label: 'Quantity (Asc) ↑', value: 'quantity' },
+    { label: 'Quantity (desc) ↓', value: '-quantity' }
+  ];
+
+  const handleOrderToggle = (status) => {
+    setSelectedorder(prev => 
       prev.includes(status) 
         ? prev.filter(s => s !== status)
         : [...prev, status]
@@ -537,18 +436,22 @@ export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
     );
   };
 
+
+
+
+
   const handleApply = () => {
     onApplyFilter({
-      status: selectedStatus,
-      categories: selectedCategories,
+      categories: SelectedCategories,
       priceRange,
-      quantityFilter
+      quantityFilter,
+      ordering,
     });
     onClose();
   };
 
   const handleClear = () => {
-    setSelectedStatus([]);
+    setSelectedorder([]);
     setSelectedCategories([]);
     setPriceRange({ min: '', max: '' });
     setQuantityFilter('');
@@ -621,7 +524,7 @@ export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
         <div style={{ padding: '24px' }}>
           
           {/* Status Filter */}
-          <div style={{ marginBottom: '24px' }}>
+          {/* <div style={{ marginBottom: '24px' }}>
             <h3 style={{
               fontSize: '14px',
               fontWeight: '600',
@@ -652,7 +555,24 @@ export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
+          {/* Odering Filter  */}
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{fontSize: '14px',fontWeight: '600',color: '#374151',marginBottom: '12px',textTransform: 'uppercase',letterSpacing: '0.5px'}}>Ordering price and quality</h3>
+                <select value={ordering}
+                  onChange={(e) => setOrdering(e.target.value)}
+                  style={{
+                    width: '100%',padding: '12px 14px',border: '1px solid #e5e7eb',borderRadius: '8px',fontSize: '14px',
+                    outline: 'none',background: 'white',cursor: 'pointer',color: '#6b7280'
+                  }}
+                >
+                  {ordeingValue.map(range => (
+                    <option key={range.value} value={range.value}>
+                      {range.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
           {/* Category Filter */}
           <div style={{ marginBottom: '24px' }}>
@@ -668,21 +588,21 @@ export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {categories.map(category => (
                 <button
-                  key={category}
+                  key={category.name}
                   onClick={() => handleCategoryToggle(category)}
                   style={{
                     padding: '10px 16px',
                     borderRadius: '8px',
-                    border: `1px solid ${selectedCategories.includes(category) ? '#3b82f6' : '#e5e7eb'}`,
-                    background: selectedCategories.includes(category) ? '#eff6ff' : 'white',
-                    color: selectedCategories.includes(category) ? '#3b82f6' : '#6b7280',
+                    border: `1px solid ${SelectedCategories.includes(category) ? '#3b82f6' : '#e5e7eb'}`,
+                    background: SelectedCategories.includes(category) ? '#eff6ff' : 'white',
+                    color: SelectedCategories.includes(category) ? '#3b82f6' : '#6b7280',
                     fontSize: '14px',
                     cursor: 'pointer',
-                    fontWeight: selectedCategories.includes(category) ? '500' : '400',
+                    fontWeight: SelectedCategories.includes(category) ? '500' : '400',
                     transition: 'all 0.2s'
                   }}
                 >
-                  {category}
+                  {category.name}
                 </button>
               ))}
             </div>
@@ -704,7 +624,7 @@ export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
                 type="number"
                 placeholder="Min"
                 value={priceRange.min}
-                onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
                 style={{
                   flex: 1,
                   padding: '12px 14px',
@@ -720,7 +640,7 @@ export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
                 type="number"
                 placeholder="Max"
                 value={priceRange.max}
-                onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
                 style={{
                   flex: 1,
                   padding: '12px 14px',
@@ -832,4 +752,130 @@ export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
   );
 };
 
+
+// ###########################################################
+
+import  { useRef,useEffect } from 'react';
+
+export const ActionMenu = ({ itemId, onEdit, onDelete }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const handleEdit = () => {
+    onEdit(itemId);
+    setIsOpen(false);
+  };
+
+  const handleDelete = () => {
+    onDelete(itemId);
+    setIsOpen(false);
+  };
+
+  return (
+    <div style={{ position: 'relative' }} ref={menuRef}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          background: 'transparent',
+          border: 'none',
+          color: '#6b7280',
+          fontSize: '18px',
+          cursor: 'pointer',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          transition: 'background 0.2s'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+      >
+        ⋮
+      </button>
+
+      {isOpen && (
+        <div style={{
+          position: 'absolute',
+          right: 0,
+          top: '100%',
+          marginTop: '4px',
+          background: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          border: '1px solid #e5e7eb',
+          minWidth: '140px',
+          zIndex: 1000,
+          overflow: 'hidden'
+        }}>
+          <button
+            onClick={handleEdit}
+            style={{
+              width: '100%',
+              padding: '10px 16px',
+              background: 'transparent',
+              border: 'none',
+              textAlign: 'left',
+              cursor: 'pointer',
+              fontSize: '14px',
+              color: '#374151',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              transition: 'background 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          >
+            <span style={{ fontSize: '16px', color: '#3b82f6' }}>✏️</span>
+            Edit
+          </button>
+
+          <button
+            onClick={handleDelete}
+            style={{
+              width: '100%',
+              padding: '10px 16px',
+              background: 'transparent',
+              border: 'none',
+              textAlign: 'left',
+              cursor: 'pointer',
+              fontSize: '14px',
+              color: '#374151',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              transition: 'background 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#fef2f2';
+              e.currentTarget.style.color = '#dc2626';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#374151';
+            }}
+          >
+            <span style={{ fontSize: '16px', color: '#ef4444' }}>🗑️</span>
+            Delete
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 

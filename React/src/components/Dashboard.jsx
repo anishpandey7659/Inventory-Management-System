@@ -1,30 +1,61 @@
 import React, { useState ,useEffect} from 'react';
 import AddProductModal from './Addproduct';
 import { getProducts, deleteProduct } from '../Apiservice';
-import { FilterModal } from './Func';
+import { FilterModal,buildFilterParams,ActionMenu } from './Func';
+import { useFetch } from '../UseHook';
+import { useCategories } from '../UseHook';
+
 
 const InventoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFilteropen, setIsFilteropen] = useState(false);
   const [inventoryData, setInventoryData] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const totalPages = Math.ceil(totalCount / pageSize);
   const start = (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalCount);
-  const [filters, setFilters] = useState({});
   const [search, setsearch] = useState({});
+  const { data: categories, loading, error } = useCategories();
+  const [Products, setProducts] = useState([]);
+  const [filters, setFilters] = useState({
+    stock_status: '',
+    category: [],
+    min_price: '',
+    max_price: '',
+    min_quantity:'',
+    max_quantity:'',
+    quantity_range: '',
+    ordering: '',
+  });
+const handleDelete = async (itemId) => {
+  if (window.confirm('Are you sure you want to delete this product?')) {
+    try {
+      await deleteProduct(itemId);
+      // Refresh the inventory after deletion
+      fetchInventory(currentPage);
+      alert('Product deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Failed to delete product');
+    }
+  }
+};
+const handleEdit = (itemId) => {
+  console.log('Edit item:', itemId);
+  // Add your edit logic here
+  // Example: Open edit modal with item data
+};
 
-
-  
    useEffect(() => {
     fetchInventory(currentPage);
     }, [currentPage]);
 
   const fetchInventory = async (page) => {
         try {
-        const response = await getProducts(filters, page, pageSize, search);
+        const response = await getProducts({ search }, page);
         
         setTotalCount(response.data.count);
         const data = response.data.results || response.data;
@@ -34,7 +65,8 @@ const InventoryPage = () => {
             name: item.product_name,
             sku: item.sku,
             category: item.category?.name || "Unknown",
-            price: item.selling_price,
+            Sp: item.selling_price,
+            Pp: item.purchase_price,
             quantity: item.quantity,
             status: item.quantity === 0 ? "Out of Stock" : item.quantity < 15 ? "Low Stock" : "In Stock"
         }));
@@ -44,7 +76,62 @@ const InventoryPage = () => {
          console.log(error.response?.data || error.message);
         }
     };
-    
+
+const defaultFilters = {
+  stock_status: '',
+  category: [],
+  min_price: '',
+  max_price: '',
+  min_quantity: '',
+  max_quantity: '',
+  quantity_range: '',
+  ordering: '',
+};
+
+const clearFilters = () => {
+  setFilters(defaultFilters);
+  setCurrentPage(1);
+  fetchInventory(1); // fetch normal data
+};
+
+
+
+  const handleFilterApply = async (incomingFilters) => {
+    const params = buildFilterParams(incomingFilters);
+
+    try {
+      const response = await getProducts(params);
+
+      const data = response.data.results || response.data;
+
+      const mappedData = data.map(item => ({
+        id: item.id,
+        name: item.product_name,
+        sku: item.sku,
+        category: item.category?.name || "Unknown",
+        Sp: item.selling_price,
+        Pp: item.purchase_price,
+
+        quantity: item.quantity,
+        status:
+          item.quantity === 0
+            ? "Out of Stock"
+            : item.quantity < 15
+              ? "Low Stock"
+              : "In Stock",
+      }));
+
+      setInventoryData(mappedData);
+      setTotalCount(response.data.count);
+      setCurrentPage(1);  // reset page to 1
+      console.log("Filter params:", params);
+    } catch (error) {
+      console.log("Filter params:", params);
+      console.log("Error:", error);
+    }
+  };
+
+
 
 
   const getStatusColor = (status) => {
@@ -100,7 +187,7 @@ const InventoryPage = () => {
 
         {/* Action Buttons */}
         <div  style={{ display: 'flex', gap: '12px' }}>
-          <button style={{
+          <button onClick={()=>setIsFilteropen(true)} style={{
             padding: '10px 20px',
             background: 'white',
             border: '1px solid #e5e7eb',
@@ -116,6 +203,26 @@ const InventoryPage = () => {
             <span>🔽</span>
             Filter
           </button>
+          <FilterModal
+          isOpen={isFilteropen} onClose={()=>setIsFilteropen(false)}
+          categories={categories} onApplyFilter={handleFilterApply}
+      
+          />
+          <button onClick={clearFilters} style={{
+            padding: '10px 20px',
+            background: 'white',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            color: '#374151',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer',  
+          }}>
+            Clear Filters
+          </button>
+
+
+
           
           <button  onClick={() => setIsModalOpen(true)}
            style={{
@@ -135,7 +242,7 @@ const InventoryPage = () => {
             Add Product
           </button>
           <AddProductModal 
-        isOpen={isModalOpen} 
+        isOpen={isModalOpen} head="Add New Product"
         onClose={() => setIsModalOpen(false)} 
       />
         </div>
@@ -193,7 +300,8 @@ const InventoryPage = () => {
                 color: '#6b7280',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px'
-              }}>PRICE</th>
+              }}>
+                Selling Price</th>
               <th style={{
                 padding: '16px 24px',
                 textAlign: 'left',
@@ -202,7 +310,19 @@ const InventoryPage = () => {
                 color: '#6b7280',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px'
-              }}>QUANTITY</th>
+              }}>
+                Purchase Price</th>
+              <th style={{
+                padding: '16px 24px',
+                textAlign: 'left',
+                fontSize: '12px',
+                fontWeight: '600',
+                color: '#6b7280',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                
+                QUANTITY</th>
               <th style={{
                 padding: '16px 24px',
                 textAlign: 'left',
@@ -262,7 +382,14 @@ const InventoryPage = () => {
                   fontSize: '14px',
                   color: '#1f2937',
                   fontWeight: '500'
-                }}>${item.price}</td>
+                }}>${item.Sp}</td>
+                
+                <td style={{
+                  padding: '16px 24px',
+                  fontSize: '14px',
+                  color: '#1f2937',
+                  fontWeight: '500'
+                }}>${item.Pp}</td>
                 
                 <td style={{
                   padding: '16px 24px',
@@ -291,15 +418,12 @@ const InventoryPage = () => {
                 </td>
                 
                 <td style={{ padding: '16px 24px' }}>
-                  <button style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#6b7280',
-                    fontSize: '18px',
-                    cursor: 'pointer',
-                    padding: '4px 8px'
-                  }}>⋮</button>
-                </td>
+                <ActionMenu 
+                  itemId={item.id}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              </td>
               </tr>
             ))}
           </tbody>
@@ -336,7 +460,7 @@ const InventoryPage = () => {
             </button>
             
             {/* Page Numbers */}
-            {[...Array(totalPages)].map((_, index) => {
+            {[...Array(totalPages || 0)].map((_, index) => {
               const page = index + 1;
               return (
                 <button

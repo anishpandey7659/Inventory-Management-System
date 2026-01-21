@@ -52,7 +52,7 @@ export const usePost = (apiFunc) => {
   return { loading, error, success, postData };
 };
 
-
+import { getCategories } from "./Apiservice";
 export const useCategories = () => {
   return useFetch(getCategories);
 };

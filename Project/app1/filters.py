@@ -18,7 +18,7 @@ class ProductFilter(filters.FilterSet):
     max_selling_price = filters.NumberFilter(field_name='selling_price',lookup_expr='lte')
 
     # 🔹 ForeignKey filters
-    category = filters.CharFilter(field_name='category__name',lookup_expr='icontains')
+    category = filters.BaseInFilter(field_name='category__id', lookup_expr='in')
     supplier = filters.CharFilter(field_name='supplier__name',lookup_expr='icontains')
     sku = filters.CharFilter(field_name='sku',lookup_expr='icontains')
 

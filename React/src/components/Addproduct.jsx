@@ -6,7 +6,7 @@ import { CreateCategoryModal,CreateSupplierModal } from './Func';
 import { createCategory,createSupplier } from "../Apiservice";
 import { usePost } from "../UseHook";
 
-const AddProductModal = ({ isOpen, onClose }) => {
+const AddProductModal = ({ isOpen, onClose ,head }) => {
 
   const { data: suppliers } = useFetch(getSuppliers);
   const { data: categories, loading: categoriesLoading, error: categoriesError } = useFetch(getCategories);
@@ -157,7 +157,7 @@ useEffect(() => {
             fontSize: '22px',
             fontWeight: '600',
             color: '#1f2937'
-          }}>Add New Product</h2>
+          }}>{head}</h2>
           <button
             onClick={onClose}
             style={{
@@ -222,7 +222,7 @@ useEffect(() => {
                 fontWeight: '500',
                 color: '#374151',
                 marginBottom: '8px'
-              }}>Product Name</label>
+              }}>{head}</label>
               <input
                 type="text"
                 name="productName"
@@ -541,34 +541,34 @@ useEffect(() => {
 };
 
 // Demo wrapper to show the modal
-const Add = () => {
-  const [isModalOpen, setIsModalOpen] = useState(true);
+// const Add = () => {
+//   const [isModalOpen, setIsModalOpen] = useState(true);
 
-  return (
-    <div style={{ padding: '40px' }}>
-      <button
-        onClick={() => setIsModalOpen(true)}
-        style={{
-          padding: '12px 24px',
-          background: '#3b82f6',
-          border: 'none',
-          borderRadius: '8px',
-          color: 'white',
-          fontSize: '14px',
-          fontWeight: '500',
-          cursor: 'pointer'
-        }}
-      >
-        Open Add Product Modal
-      </button>
+//   return (
+//     <div style={{ padding: '40px' }}>
+//       <button
+//         onClick={() => setIsModalOpen(true)}
+//         style={{
+//           padding: '12px 24px',
+//           background: '#3b82f6',
+//           border: 'none',
+//           borderRadius: '8px',
+//           color: 'white',
+//           fontSize: '14px',
+//           fontWeight: '500',
+//           cursor: 'pointer'
+//         }}
+//       >
+//         Open Add Product Modal
+//       </button>
 
-      <AddProductModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-      />
-    </div>
-  );
-};
+//       <AddProductModal 
+//         isOpen={isModalOpen} 
+//         onClose={() => setIsModalOpen(false)} 
+//       />
+//     </div>
+//   );
+// };
 
 // export default Add;
 export default AddProductModal;
