@@ -360,12 +360,13 @@ export const buildFilterParams = (filters) => {
   }
 
   // price range
-  if (filters.priceRange?.min) {
-    params.min_price = filters.priceRange.min;
+  if (filters.priceRange?.min != null) {
+    params.min_selling_price = filters.priceRange.min;
   }
-  if (filters.priceRange?.max) {
-    params.max_price = filters.priceRange.max;
+  if (filters.priceRange?.max != null) {
+    params.max_selling_price = filters.priceRange.max;
   }
+
 
   // quantity filter
   if (filters.quantityFilter) {
@@ -402,13 +403,13 @@ export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
 
   const orderOptions = ['selling_price', '-selling_price', 'purchase_price','-purchase_price','quantity','-quantity'];
   
-  const quantityRanges = [
-    { label: 'All Quantities', value: '' },
-    { label: 'Critical (< 20)', value: 'critical' },
-    { label: 'Low (20-50)', value: 'low' },
-    { label: 'Medium (51-100)', value: 'medium' },
-    { label: 'High (> 100)', value: 'high' }
-  ];
+  // const quantityRanges = [
+  //   { label: 'All Quantities', value: '' },
+  //   { label: 'Critical (< 20)', value: 'critical' },
+  //   { label: 'Low (20-50)', value: 'low' },
+  //   { label: 'Medium (51-100)', value: 'medium' },
+  //   { label: 'High (> 100)', value: 'high' }
+  // ];
 
   const ordeingValue= [
     { label: 'Default', value: '' },
@@ -655,7 +656,7 @@ export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
           </div>
 
           {/* Quantity Filter */}
-          <div style={{ marginBottom: '24px' }}>
+          {/* <div style={{ marginBottom: '24px' }}>
             <h3 style={{
               fontSize: '14px',
               fontWeight: '600',
@@ -686,7 +687,7 @@ export const FilterModal = ({ isOpen, onClose, onApplyFilter, categories }) => {
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
         </div>
 
         {/* Footer */}

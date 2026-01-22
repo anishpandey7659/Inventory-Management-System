@@ -50,7 +50,8 @@ export const getStockOuts = (params) => api.get('/stockout/', { params });
 export const createStockOut = (data) => api.post('/stockout/', data);
 
 
-export const createsales = (data) => api.get('/sales/',data);
+export const createsales = (data) => api.post('/sales/', data);
+
 
 
 

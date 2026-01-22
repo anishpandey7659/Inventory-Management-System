@@ -45,16 +45,18 @@ class StockInSerializer(serializers.ModelSerializer):
         fields="__all__"
 
 class SaleItemSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     class Meta:
         model = SaleItem
-        fields = ["product", "quantity"]
+        fields = ["product", "quantity", "price"]
 
 class SaleSerializer(serializers.ModelSerializer):
     items = SaleItemSerializer(many=True)
 
     class Meta:
         model = Sale
-        fields = ["id", "customer_name", "date", "items"]
+        fields = ["id", "customer_name", "customer_phone", "date", "subtotal", "tax", "total_amount", "items"]
         read_only_fields = ["id", "date"]
 
     def create(self, validated_data):
@@ -68,14 +70,14 @@ class SaleSerializer(serializers.ModelSerializer):
                 quantity = item["quantity"]
 
                 if quantity > product.quantity:
-                    raise serializers.ValidationError(
-                        f"Not enough stock for {product.name}"
+                    raise serializers.ValidationError(  
+                        f"Not enough stock for product id {product.id}"
                     )
 
                 SaleItem.objects.create(
                     sale=sale,
                     product=product,
-                    quantity=quantity
+                    quantity=quantity,
                 )
 
                 product.quantity -= quantity

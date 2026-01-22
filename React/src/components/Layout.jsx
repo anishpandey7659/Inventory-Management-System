@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
+import { NavLink , Outlet,useLocation} from "react-router-dom";
+
 
 const Layout = ({ children }) => {
   const [activeItem, setActiveItem] = useState('Dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const menuItems = [
-    { name: 'Dashboard', icon: '📊' },
-    { name: 'Inventory', icon: '📦' },
-    { name: 'Orders', icon: '🛒' },
-    { name: 'Reports', icon: '📄' },
-    { name: 'Chatbot', icon: '🤖' }
-  ];
+const location = useLocation();
+
+const getTitle = () => {
+  const path = location.pathname;
+
+  if (path === "/") return "Inventory";
+  if (path === "/Inventory") return "Inventory";
+  if (path === "/billing") return "Billing";
+  return "Dashboard";
+};
+
 
 return (
   <div className="flex h-screen overflow-hidden">
@@ -36,20 +42,81 @@ return (
 
         {/* Menu Items */}
         <nav className="px-2.5">
-          {menuItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => setActiveItem(item.name)}
-              className={`w-full flex items-center gap-3.5 py-3.5 px-4 mb-2 border-none rounded-[10px] text-base font-medium cursor-pointer transition-all duration-200 text-left ${
-                activeItem === item.name
-                  ? 'bg-slate-700 text-blue-400'
-                  : 'bg-transparent text-slate-400 hover:bg-gray-700'
-              }`}
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span>{item.name}</span>
-            </button>
-          ))}
+          <NavLink
+             to="/dashboard"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3.5 py-3.5 px-4 mb-2 border-none rounded-[10px]
+              text-base font-medium cursor-pointer transition-all duration-200 text-left
+              ${
+                isActive
+                  ? "bg-slate-700 text-blue-400"
+                  : "bg-transparent text-slate-400 hover:bg-gray-700"
+              }`
+            }
+          >
+            <span className="text-xl">📊</span>
+            <span>Dashboard</span>
+          </NavLink>
+            <NavLink
+            to="/Inventory"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3.5 py-3.5 px-4 mb-2 border-none rounded-[10px]
+              text-base font-medium cursor-pointer transition-all duration-200 text-left
+              ${
+                isActive
+                  ? "bg-slate-700 text-blue-400"
+                  : "bg-transparent text-slate-400 hover:bg-gray-700"
+              }`
+            }
+          >
+            <span className="text-xl">📦</span>
+            <span>Inventory</span>
+          </NavLink>
+           <NavLink
+            to="/billing"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3.5 py-3.5 px-4 mb-2 border-none rounded-[10px]
+              text-base font-medium cursor-pointer transition-all duration-200 text-left
+              ${
+                isActive
+                  ? "bg-slate-700 text-blue-400"
+                  : "bg-transparent text-slate-400 hover:bg-gray-700"
+              }`
+            }
+          >
+            <span className="text-xl">🛒</span>
+            <span>Billing</span>
+          </NavLink>
+            <NavLink
+            to="/report"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3.5 py-3.5 px-4 mb-2 border-none rounded-[10px]
+              text-base font-medium cursor-pointer transition-all duration-200 text-left
+              ${
+                isActive
+                  ? "bg-slate-700 text-blue-400"
+                  : "bg-transparent text-slate-400 hover:bg-gray-700"
+              }`
+            }
+          >
+            <span className="text-xl">📄</span>
+            <span>Report</span>
+          </NavLink>
+           <NavLink
+            to="/chatbot"
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3.5 py-3.5 px-4 mb-2 border-none rounded-[10px]
+              text-base font-medium cursor-pointer transition-all duration-200 text-left
+              ${
+                isActive
+                  ? "bg-slate-700 text-blue-400"
+                  : "bg-transparent text-slate-400 hover:bg-gray-700"
+              }`
+            }
+          >
+            <span className="text-xl">🤖</span>
+            <span>Chatbot</span>
+          </NavLink>
         </nav>
       </div>
 
@@ -80,7 +147,7 @@ return (
               <span className="text-2xl">☰</span>
             </button>
             <h2 className="text-gray-800 m-0 text-[28px] font-semibold">
-              Dashboard
+              {getTitle()}
             </h2>
           </div>
 
@@ -124,16 +191,7 @@ return (
 
       {/* Page Content */}
       <div className="flex-1 overflow-auto bg-gray-50 p-px">
-        {children || (
-          <div>
-            <h3 className="text-gray-800 text-xl mb-4">
-              Welcome to Dashboard
-            </h3>
-            <p className="text-gray-500">
-              Your content goes here...
-            </p>
-          </div>
-        )}
+          <Outlet /> 
       </div>
     </div>
   </div>
