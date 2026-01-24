@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from "react";
-import AddProductModal from "./Addproduct";
-import { getProducts, deleteProduct, updateProduct } from "../Apiservice";
-import { FilterModal, buildFilterParams, ActionMenu } from "./Func";
+import React, { useState, useEffect, use } from "react";
+import AddProductModal from "./Subpage/Addproduct";
+import { getProducts, deleteProduct, updateProduct,getCategories } from "../Apiservice";
+import { buildFilterParams } from "./Func";
+import {FilterModal} from "../components/Subpage/Filter"
+import {ActionMenu } from "../components/Subpage/ActionMenu"
 import { useFetch } from "../UseHook";
-import { useCategories } from "../UseHook";
+import StockInPage from "./Subpage/StockIn";
+
+
+
 
 const InventoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -12,6 +17,7 @@ const InventoryPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFilteropen, setIsFilteropen] = useState(false);
+  const [InStockopen, setInStockopen] = useState(false);
 
   const [inventoryData, setInventoryData] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -19,8 +25,9 @@ const InventoryPage = () => {
 
   const start = (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalCount);
+  const [productList, setProductList] = useState([]);
 
-  const { data: categories } = useCategories();
+  const { data:categories, loading, error } = useFetch(getCategories, []);
 
   const [filters, setFilters] = useState({
     stock_status: "",
@@ -163,9 +170,7 @@ const InventoryPage = () => {
     <div className="p-3.5 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-3.5">
         <div className="relative w-96">
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
-            🔍
-          </span>
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg">🔍</span>
           <input
             type="text"
             placeholder="Search products..."
@@ -197,6 +202,20 @@ const InventoryPage = () => {
             Clear Filters
           </button>
 
+          <button 
+            onClick={() => {
+              setInStockopen(true);
+            }} 
+            className="py-2.5 px-5 bg-white border border-gray-200 rounded-lg text-gray-700 text-sm font-medium cursor-pointer"
+          >
+            Stock in
+          </button>
+            <StockInPage
+            isOpen={InStockopen}
+            onClose={()=>setInStockopen(false)}
+            head ="Stock in"
+
+            />
           <button 
             onClick={() => {
               setModalMode("add");

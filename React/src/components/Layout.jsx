@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink , Outlet,useLocation} from "react-router-dom";
-
+import { Link } from 'react-router-dom';
 
 const Layout = ({ children }) => {
   const [activeItem, setActiveItem] = useState('Dashboard');
@@ -180,9 +180,11 @@ return (
                 AU
               </div>
               <div className="text-left">
+                <Link to='/profile-page'>
                 <p className="text-gray-800 m-0 text-[15px] font-medium">
                   Admin User
                 </p>
+                 </Link>
               </div>
             </div>
           </div>

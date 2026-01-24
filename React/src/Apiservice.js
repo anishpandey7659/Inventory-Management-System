@@ -45,15 +45,16 @@ export const createSupplier = (data) => api.post('/suppliers/', data);
 export const getStockIns = (params) => api.get('/stockin/', { params });
 export const createStockIn = (data) => api.post('/stockin/', data);
 
-// Stock Out
-export const getStockOuts = (params) => api.get('/stockout/', { params });
-export const createStockOut = (data) => api.post('/stockout/', data);
+
 
 
 export const createsales = (data) => api.post('/sales/', data);
+export const getsales = (params)=>api.get('/sales/',params)
 
 
-
+//Stats
+export const total_revenue = await axios.get("http://localhost:8000/revenue/");
+console.log(total_revenue.data.total_revenue);
 
 
 export default api;

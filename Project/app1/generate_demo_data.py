@@ -8,7 +8,7 @@ import random
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Project/Project/settings')
 django.setup()
 
-from .models import Category, Supplier, Product, StockIn, StockOut
+from .models import Category, Supplier, Product, StockIn
 
 fake = Faker()
 
@@ -51,10 +51,6 @@ for product in products:
     )
 
 # Stock Out (Sell stock)
-for product in products:
-    StockOut.objects.create(
-        product=product,
-        quantity=random.randint(1, 5)
-    )
+
 
 print("Demo data created successfully!")

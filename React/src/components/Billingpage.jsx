@@ -1,7 +1,8 @@
 import React, { useState,useEffect } from 'react';
-import { X, Plus, Minus, Search, ShoppingCart, FileText, Printer, Save } from 'lucide-react';
+import { X, Plus, Minus, Search, ShoppingCart, FileText, Printer, Save,History} from 'lucide-react';
 import { getProducts } from '../Apiservice';
 import { createsales } from '../Apiservice';
+import { Link } from "react-router-dom";
 
 const BillingCreate = () => {
   const [customerName, setCustomerName] = useState('John Doe');
@@ -177,11 +178,13 @@ const calculateSubtotal = () => {
             <h1 className="text-2xl font-bold text-gray-900">Create Invoice</h1>
             <p className="text-sm text-gray-600">Fill in the details to generate a new invoice</p>
           </div>
-          <button className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm text-sm">
-            <Save className="w-4 h-4" />
-            Save Draft
-          </button>
+          
+          <Link to="/billinghistory" className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm text-sm">
+          <History size={18} />
+           Billing history
+          </Link>
         </div>
+        
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 overflow-hidden">
           {/* Left Column - Customer Details & Add Items */}

@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, FileText, Package, Users, ShoppingCart, AlertCircle } from 'lucide-react';
+import { getsales,total_revenue } from '../Apiservice';
 
+
+let Total_Revenue=total_revenue.data.total_revenue
 const Dashboard = () => {
   // Revenue trend data
   const revenueData = [
@@ -68,7 +71,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total Revenue"
-            value="$5,389.95"
+            value={ Total_Revenue}
             icon={DollarSign}
             trend="up"
             trendValue="12.5%"

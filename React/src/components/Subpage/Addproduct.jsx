@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { createProduct,updateProduct } from "../Apiservice";
-import { useFetch } from "../UseHook";
-import { getSuppliers,getCategories } from "../Apiservice";
-import { CreateCategoryModal,CreateSupplierModal } from "./Func";
+import { createProduct,updateProduct } from "../../Apiservice";
+import { useCategories,useSuppilier } from "../../UseHook";
+import { getSuppliers,getCategories } from "../../Apiservice";
+
+import { CreateCategoryModal } from "./CreateCategory"
+import { CreateSupplierModal } from "./CreateSupplier"
 
 
 const AddProductModal = ({ isOpen, onClose, head, mode = "add", product = null }) => {
-  const { data: suppliers } = useFetch(getSuppliers);
-  const { data: categories } = useFetch(getCategories);
+  const { data: suppliers, loadingSup, errorSup  } =useSuppilier();
+  const { data: categories, loading, error } = useCategories();
+
 
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -16,9 +19,9 @@ const AddProductModal = ({ isOpen, onClose, head, mode = "add", product = null }
   const [sku, setSku] = useState("");
   const [category, setCategory] = useState("");
   const [supplier, setSupplier] = useState("");
-  const [quantity, setQuantity] = useState("");
   const [PP, setPP] = useState("");
   const [SP, setSP] = useState("");
+  const [quantity, setQuantity] = useState("");
 
   const [showCreateCategory, setShowCreateCategory] = useState(false);
   const [showCreateSupplier, setShowCreateSupplier] = useState(false);
@@ -27,7 +30,8 @@ const AddProductModal = ({ isOpen, onClose, head, mode = "add", product = null }
   const sellingPrice = Number(SP);
   const profit = purchasePrice && sellingPrice ? (sellingPrice - purchasePrice).toFixed(2) : 0;
   const profitMargin = purchasePrice ? (((sellingPrice - purchasePrice) / purchasePrice) * 100).toFixed(2) : 0;
-
+  const isEdit = mode === "edit"
+  // console.log("That s is ",data);
   // Prefill form when editing
   useEffect(() => {
     if (mode === "edit" && product) {
@@ -74,10 +78,10 @@ const AddProductModal = ({ isOpen, onClose, head, mode = "add", product = null }
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!supplier || !category) {
-      setErrorMsg("Please select supplier and category");
-      return;
-    }
+    // if (!supplier || !category) {
+    //   setErrorMsg("Please select supplier and category");
+    //   return;
+    // }
 
     const productData = {
       product_name: name,
@@ -85,10 +89,10 @@ const AddProductModal = ({ isOpen, onClose, head, mode = "add", product = null }
       purchase_price: PP,
       category: Number(category),
       supplier: Number(supplier),
-      quantity: quantity,
+      quantity: Number(quantity),
       sku: sku,
     };
-
+    console.log(productData)
     try {
       if (mode === "edit") {
         await updateProduct(product.id, productData);
@@ -181,7 +185,7 @@ return (
               className="w-full py-2.5 px-3.5 rounded-lg border border-gray-300 text-sm outline-none bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               <option value="">Select Category</option>
-              {categories.map((cat) => (
+              {categories?.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>
@@ -194,12 +198,14 @@ return (
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Quantity
+              Quantity (optional)
             </label>
             <input
               type="number"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
+              placeholder=""
+              disabled={isEdit}
               className="w-full py-2.5 px-3.5 rounded-lg border border-gray-300 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
           </div>
@@ -263,7 +269,7 @@ return (
             className="w-full py-2.5 px-3.5 rounded-lg border border-gray-300 text-sm outline-none bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           >
             <option value="">Select Supplier</option>
-            {suppliers.map((sup) => (
+            {suppliers?.map((sup) => (
               <option key={sup.id} value={sup.id}>
                 {sup.name}
               </option>
@@ -307,38 +313,6 @@ return (
 );
 };
 
-
-
-
-// Demo wrapper to show the modal
-// const Add = () => {
-//   const [isModalOpen, setIsModalOpen] = useState(true);
-
-//   return (
-//     <div style={{ padding: '40px' }}>
-//       <button
-//         onClick={() => setIsModalOpen(true)}
-//         style={{
-//           padding: '12px 24px',
-//           background: '#3b82f6',
-//           border: 'none',
-//           borderRadius: '8px',
-//           color: 'white',
-//           fontSize: '14px',
-//           fontWeight: '500',
-//           cursor: 'pointer'
-//         }}
-//       >
-//         Open Add Product Modal
-//       </button>
-
-//       <AddProductModal 
-//         isOpen={isModalOpen} 
-//         onClose={() => setIsModalOpen(false)} 
-//       />
-//     </div>
-//   );
-// };
 
 // export default Add;
 export default AddProductModal;

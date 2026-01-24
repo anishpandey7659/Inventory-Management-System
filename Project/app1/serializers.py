@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product,Category,Supplier,StockOut,StockIn,Sale, SaleItem
+from .models import Product,Category,Supplier,StockIn,Sale, SaleItem
 from django.db import transaction
 #Serializer
 class CategorySerializer(serializers.ModelSerializer):
@@ -14,11 +14,11 @@ class SupplierSerializer(serializers.ModelSerializer):
         fields="__all__"
 
 class ProductSerializer(serializers.ModelSerializer):
-    supplier = serializers.PrimaryKeyRelatedField(
-        queryset=Supplier.objects.all()
-    )
     category = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all()
+    )
+    supplier= serializers.PrimaryKeyRelatedField(
+        queryset=Supplier.objects.all()
     )
 
     class Meta:
@@ -33,16 +33,14 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 
-class StockOutSerializer(serializers.ModelSerializer):
-    class Meta:
-        model =StockOut
-        fields="__all__"
+
 
 
 class StockInSerializer(serializers.ModelSerializer):
     class Meta:
         model =StockIn
         fields="__all__"
+
 
 class SaleItemSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
@@ -84,3 +82,16 @@ class SaleSerializer(serializers.ModelSerializer):
                 product.save()
 
         return sale
+
+
+from django.contrib.auth.models import User
+from rest_framework import serializers
+
+class Userserializer(serializers.ModelSerializer):
+    password=serializers.CharField(write_only=True,min_length=8,style={'input_type':'password'})
+    class Meta:
+        model=User
+        fields =['username','email','password']
+    def create(self, validated_data):
+        user=User.objects.create_user(**validated_data) 
+        return user

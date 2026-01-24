@@ -1,18 +1,39 @@
 import { useState, useEffect } from "react";
 
-//Fetch function
+// Fetch function
 export const useFetch = (apiFunc, deps = []) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      const response = await apiFunc();
-      const result = response.data.results || response.data;
-      setData(Array.isArray(result) ? result : []);
+      let allResults = [];
+      let response = await apiFunc(); // page 1
+
+      while (true) {
+        const resData = response.data;
+
+        // DRF style
+        if (resData.results) {
+          allResults.push(...resData.results);
+          if (!resData.next) break;
+
+          // fetch next page
+          response = await fetch(resData.next).then(r => r.json()).then(d => ({ data: d }));
+        } else {
+          // non-paginated API
+          allResults = resData;
+          break;
+        }
+      }
+
+      setData(allResults);
     } catch (err) {
-      setError(err.message);
+      setError(err?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -24,6 +45,7 @@ export const useFetch = (apiFunc, deps = []) => {
 
   return { data, loading, error, refetch: fetchData };
 };
+
 
 
 //Post Function
@@ -52,7 +74,15 @@ export const usePost = (apiFunc) => {
   return { loading, error, success, postData };
 };
 
-import { getCategories } from "./Apiservice";
+import { getCategories,getSuppliers } from "./Apiservice";
 export const useCategories = () => {
   return useFetch(getCategories);
 };
+
+export const useSuppilier =()=>{
+  return useFetch(getSuppliers);
+}
+
+
+import { getProducts } from "./Apiservice";
+

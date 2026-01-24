@@ -1,32 +1,35 @@
-import { useState } from 'react'
-import Add from './components/Addproduct'
-import ProductList from './components/ProductList'
-import { FilterModal } from './components/Func'
-import BillingPage from './components/Billingpage'
+import BillingPage from "./components/Billingpage"
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from './components/Layout'
 import InventoryPage from './components/Inventory'  
 import Dashboard from './components/Dashboard'
 import Chatbot from './components/Chatbot'
 import Reports from './components/Report'
+import BillingHistory from './components/Billinghistory'
+import ProfilePage from "./components/Profile";
+import HomePage from "./components/Homepage";
 
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<InventoryPage />} />
-          <Route path="Inventory" element={<InventoryPage />} />
-          <Route path="chatbot" element={<Chatbot />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="billing" element={<BillingPage />} />
-          <Route path="report" element={<Reports />} />
+        <Route element={<Layout />}>
+          <Route path="/inventory" element={<InventoryPage />} />
+          <Route path="/profile-page" element={<ProfilePage />} />
+          <Route path="/chatbot" element={<Chatbot />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/billing" element={<BillingPage />} />
+          <Route path="/report" element={<Reports />} />
+          <Route path="/billinghistory" element={<BillingHistory />} />
         </Route>
+        <Route path="/"element={<HomePage/>}/>
+
       </Routes>
     </BrowserRouter>
   );
 }
+
 
 export default App;
 

@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { Download, Trash2, FileText, Plus, TrendingUp, TrendingDown, Package, ShoppingCart, Users } from 'lucide-react';
+import { getsales,total_revenue } from '../Apiservice';
+
+
+let Total_Revenue=total_revenue.data.total_revenue
 
 const Reports = () => {
   const [reports, setReports] = useState([
@@ -39,9 +43,9 @@ const Reports = () => {
 
   const stats = [
     {
-      title: 'Total Revenue',
+      title: "Total Revenue",
       subtitle: 'Last 30 days',
-      value: '$48,294.00',
+      value: Total_Revenue,
       change: '+12.5%',
       isPositive: true,
       color: 'green',
@@ -50,7 +54,7 @@ const Reports = () => {
     {
       title: 'Products Sold',
       subtitle: 'Last 30 days',
-      value: '1,452',
+      value: '18',
       change: '+5.2%',
       isPositive: true,
       color: 'blue',

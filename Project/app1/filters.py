@@ -1,5 +1,5 @@
 import django_filters
-from .models import Product,Category,Supplier,StockOut,StockIn
+from .models import Product,Category,Supplier,StockIn
 from django_filters import rest_framework as filters
 
 class ProductFilter(filters.FilterSet):
@@ -54,10 +54,3 @@ class StockInFilter(django_filters.FilterSet):
         model = StockIn
         fields = ['product', 'supplier', 'start_date', 'end_date']
 
-class StockOutFilter(django_filters.FilterSet):
-    product=django_filters.CharFilter(field_name='product__product_name',lookup_expr='icontains')
-    start_date = django_filters.DateFilter(field_name='date',lookup_expr='gte')
-    end_date = django_filters.DateFilter(field_name='date',lookup_expr='lte')
-    class Meta:
-        model = StockOut
-        fields = ['product', 'start_date', 'end_date']
