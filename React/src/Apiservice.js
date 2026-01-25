@@ -1,7 +1,7 @@
 // src/services/api.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'http://127.0.0.1:8000/api/v1/';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -53,8 +53,7 @@ export const getsales = (params)=>api.get('/sales/',params)
 
 
 //Stats
-export const total_revenue = await axios.get("http://localhost:8000/revenue/");
-console.log(total_revenue.data.total_revenue);
+export const total_revenue = await axios.get("http://localhost:8000/api/v1/revenue/");
 
 
 export default api;

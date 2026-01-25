@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Search, Eye, Download, Printer, Plus, FileText, DollarSign, CheckCircle, Clock } from 'lucide-react';
 import { Link } from "react-router-dom";
 import { useFetch } from "../UseHook";
-import { getsales,total_revenue } from '../Apiservice';
+import { getsales,total_revenue,getProduct } from '../Apiservice';
 
 const BillingHistory = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -11,6 +11,50 @@ const BillingHistory = () => {
   const [dateTo, setDateTo] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const { data, loading, error } = useFetch(getsales, []);
+  const [productList, setProductList] = useState([]);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [selectedInvoiceDetail, setSelectedInvoiceDetail] = useState(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [productNames, setProductNames] = useState({});
+  const pageSize = 10;
+
+const fetchInvoiceDetail = async (invoice) => {
+  setLoadingDetail(true);
+  try {
+    const numericId = invoice.id.replace('INV-', '');
+    const url = `http://127.0.0.1:8000/api/v1/sales/${numericId}/`;
+    
+    console.log('Fetching URL:', url);
+    console.log('Invoice object:', invoice);
+    
+    const response = await fetch(url);
+    
+    console.log('Response status:', response.status);
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.log('Error response:', errorData);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+  
+    // console.log('Fetched data:', data);
+    setSelectedInvoiceDetail(data);
+  
+  } catch (error) {
+    console.error('Error fetching invoice details:', error);
+    alert(`Failed to load invoice details: ${error.message}`);
+  } finally {
+    setLoadingDetail(false);
+  }
+};
+
+
+
+
+
+
 
   const invoices = (data?.results ?? data ?? []).map(sale => ({
   id: `INV-${sale.id}`,                      
@@ -21,9 +65,22 @@ const BillingHistory = () => {
   amount: Number(sale.total_amount),         
   status: sale.status ?? "paid",             
 }));
+
+  const totalCount =invoices .length
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const start = (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, totalCount);
+
+
+console.log("Try: ",invoices .length)
+
 let Total_Invoices=data.length
 let Total_Revenue=total_revenue.data.total_revenue
 console.log(total_revenue.data.total_revenue);
+const paginatedInvoices =invoices.slice(
+  (currentPage-1)* pageSize,
+  currentPage * pageSize
+)
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -130,96 +187,260 @@ console.log(total_revenue.data.total_revenue);
       </div>
 
       {/* Invoices Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Invoice ID</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Customer</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Date</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Items</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Amount</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {invoices.map((invoice) => (
-                <tr key={invoice.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4 text-sm font-medium text-blue-600">#{invoice.id}</td>
-                  <td className="px-6 py-4 text-sm text-gray-800">{invoice.customer}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{invoice.date}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{invoice.items} items</td>
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-800">
-                    ${invoice.amount.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(invoice.status)}`}>
-                      {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center space-x-3">
-                      <button className="text-blue-600 hover:text-blue-800 transition" title="View">
-                        <Eye size={18} />
-                      </button>
-                      <button className="text-gray-600 hover:text-gray-800 transition" title="Download">
-                        <Download size={18} />
-                      </button>
-                      <button className="text-purple-600 hover:text-purple-800 transition" title="Print">
-                        <Printer size={18} />
-                      </button>
-                    </div>
-                  </td>
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Invoice ID</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Customer</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Date</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Items</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Amount</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {invoices.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((invoice) => (
+                  <tr key={invoice.id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4 text-sm font-medium text-blue-600">
+                    <button   onClick={() => {setSelectedInvoice(invoice);fetchInvoiceDetail(invoice);}}
+                      className="hover:underline cursor-pointer"
+                      >
+                      #{invoice.id}
+                    </button>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-800">{invoice.customer}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{invoice.date}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{invoice.items} items</td>
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-800">
+                      ${invoice.amount.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(invoice.status)}`}>
+                        {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-3">
+                        <button onClick={() => {setSelectedInvoice(invoice);fetchInvoiceDetail(invoice);}} className="text-blue-600 hover:text-blue-800 transition" title="View">
+                          <Eye size={18} />
+                        </button>
+                        <button className="text-gray-600 hover:text-gray-800 transition" title="Download">
+                          <Download size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <span className="text-sm text-gray-600">Showing {start} – {end} of {totalCount} entries</span>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ‹ Prev
+              </button>
+              {[...Array(totalPages)].map((_, index) => {
+                const page = index + 1;
+                return (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`py-2 px-4 border border-gray-200 rounded-md text-sm font-medium cursor-pointer ${
+                      currentPage === page 
+                        ? 'bg-blue-500 text-white' 
+                        : 'bg-white text-gray-500'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+              
+              <button 
+                disabled={currentPage === totalPages} 
+                onClick={() => setCurrentPage(p => p + 1)}
+                className="py-2 px-4 bg-white border border-gray-200 rounded-md text-gray-500 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Pagination */}
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <div className="text-sm text-gray-600">
-            Showing 1 to 6 of 248 entries
+
+          {/* ADD THE MODAL HERE - Invoice Detail Modal */}
+    {selectedInvoice && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          {/* Modal Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-2xl font-bold">Invoice Details</h3>
+                <p className="text-blue-100 mt-1">#{selectedInvoice.id}</p>
+              </div>
+              <button 
+                onClick={() => {
+                  setSelectedInvoice(null);
+                  setSelectedInvoiceDetail(null);
+                }}
+                className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              ‹
-            </button>
-            <button
-              onClick={() => setCurrentPage(1)}
-              className={`px-3 py-1 rounded-lg ${currentPage === 1 ? 'bg-blue-600 text-white' : 'border border-gray-300 text-gray-600 hover:bg-gray-50'}`}
-            >
-              1
-            </button>
-            <button className="px-3 py-1 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
-              2
-            </button>
-            <button className="px-3 py-1 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
-              3
-            </button>
-            <button className="px-3 py-1 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
-              4
-            </button>
-            <span className="px-2 text-gray-600">...</span>
-            <button className="px-3 py-1 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
-              42
-            </button>
-            <button
-              onClick={() => setCurrentPage(currentPage + 1)}
-              className="px-3 py-1 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50"
-            >
-              ›
-            </button>
+
+          {/* Modal Body */}
+          <div className="p-6">
+            {loadingDetail ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+            ) : selectedInvoiceDetail ? (
+              <>
+                {/* Customer & Invoice Info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-600 mb-3">Customer Information</h4>
+                    <div className="space-y-2">
+                      <div>
+                        <label className="text-xs text-gray-500">Customer Name</label>
+                        <p className="text-sm font-semibold text-gray-800">{selectedInvoiceDetail.customer_name}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Phone Number</label>
+                        <p className="text-sm font-semibold text-gray-800">
+                          {selectedInvoiceDetail.customer_phone || 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-gray-600 mb-3">Invoice Information</h4>
+                    <div className="space-y-2">
+                      <div>
+                        <label className="text-xs text-gray-500">Invoice Date</label>
+                        <p className="text-sm font-semibold text-gray-800">
+                          {new Date(selectedInvoiceDetail.date).toLocaleString("en-GB")}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Status</label>
+                        <div className="mt-1">
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(selectedInvoice.status)}`}>
+                            {selectedInvoice.status.charAt(0).toUpperCase() + selectedInvoice.status.slice(1)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Items Table */}
+                <div className="border rounded-lg overflow-hidden mb-6">
+                  <div className="bg-gray-50 px-4 py-3 border-b">
+                    <h4 className="text-sm font-semibold text-gray-800 flex items-center">
+                      <FileText className="mr-2" size={18} />
+                      Invoice Items
+                    </h4>
+                  </div>
+                  <table className="w-full">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Product ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Quantity</th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700">Unit Price</th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {selectedInvoiceDetail.items.map((item, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm text-gray-800">ProductId #{item.product}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{item.quantity}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600 text-right">${parseFloat(item.price).toFixed(2)}</td>
+                          <td className="px-4 py-3 text-sm font-semibold text-gray-800 text-right">
+                            ${(parseFloat(item.price) * item.quantity).toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Totals Section */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <div className="max-w-sm ml-auto space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Subtotal</span>
+                      <span className="text-sm font-semibold text-gray-800">
+                        ${parseFloat(selectedInvoiceDetail.subtotal).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Tax</span>
+                      <span className="text-sm font-semibold text-gray-800">
+                        ${parseFloat(selectedInvoiceDetail.tax).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="border-t pt-3 flex items-center justify-between">
+                      <span className="text-base font-bold text-gray-800">Total Amount</span>
+                      <span className="text-2xl font-bold text-green-600">
+                        ${parseFloat(selectedInvoiceDetail.total_amount).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="border-t mt-6 pt-6 flex items-center justify-end space-x-3">
+                  <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center space-x-2">
+                    <Download size={18} />
+                    <span>Download PDF</span>
+                  </button>
+                  <button onClick={() => window.print()}  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center space-x-2">
+                    <Printer size={18} />
+                    <span> Print </span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setSelectedInvoice(null);
+                      setSelectedInvoiceDetail(null);
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  >
+                    Close
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                Failed to load invoice details
+              </div>
+            )}
           </div>
         </div>
       </div>
+    )}
+    {/* END OF MODAL */}
+    
+    
     </div>
+    
   );
 };
 
