@@ -130,7 +130,7 @@ const handleLogin = async (e) => {
 
   try {
     const response = await axios.post("http://127.0.0.1:8000/api/v1/token/", userData);
-    
+    console.log(response.data);    
     localStorage.setItem('accessToken', response.data.access);
     localStorage.setItem('refreshToken', response.data.refresh);
     
@@ -139,26 +139,9 @@ const handleLogin = async (e) => {
     setIsLogin(true)
     
   } catch (error) {
-    console.error("Login error:", error);
+    // console.error("Login error:", error);
     console.log("Error response data:", error.response?.data); 
-    
-    // Better error handling
-    if (error.response) {
-      // Server responded with error
-      if (error.response.status === 401) {
-        setErrors({ general: "Invalid username or password" });
-      } else if (error.response.data) {
-        setErrors(error.response.data);
-      } else {
-        setErrors({ general: "Login failed. Please try again." });
-      }
-    } else if (error.request) {
-      // Request made but no response
-      setErrors({ general: "Cannot reach server. Please check your connection." });
-    } else {
-      // Something else happened
-      setErrors({ general: "An unexpected error occurred." });
-    }
+    setErrors("Invalid Credentials")
     
   } finally {
     setLoading(false);
@@ -376,6 +359,11 @@ const handleLogin = async (e) => {
                 <X size={24} />
               </button>
             </div>
+            {Errors && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+              {Errors.data}
+            </div>
+          )}
             <div className="space-y-4">
               {!isLogin && (
               <div>

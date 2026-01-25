@@ -12,7 +12,7 @@ const axiosInstance = axios.create({
 // Request Interceptor
 axiosInstance.interceptors.request.use(
     function(config){
-        const accessToken = localStorage.getItem('accessToken'); // FIXED TYPO: was 'acessToken'
+        const accessToken = localStorage.getItem('accessToken'); 
         if(accessToken){
             config.headers['Authorization'] = `Bearer ${accessToken}`;
         }
@@ -36,7 +36,7 @@ axiosInstance.interceptors.response.use(
             const refreshToken = localStorage.getItem('refreshToken');
             
             try{
-                const response = await axios.post(`${baseURL}/token/refresh/`, {
+                const response = await axiosInstance.post(`${baseURL}/token/refresh/`, {
                     refresh: refreshToken
                 });
                 

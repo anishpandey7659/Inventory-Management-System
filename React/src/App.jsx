@@ -8,25 +8,39 @@ import Reports from './components/Report'
 import BillingHistory from './components/Billinghistory'
 import ProfilePage from "./components/Profile";
 import HomePage from "./components/Homepage";
+import Authprovider from "./Authprovider";
+import Privateroute from "./components/Privateroute";
 
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/inventory" element={<InventoryPage />} />
-          <Route path="/profile-page" element={<ProfilePage />} />
-          <Route path="/chatbot" element={<Chatbot />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/billing" element={<BillingPage />} />
-          <Route path="/report" element={<Reports />} />
-          <Route path="/billinghistory" element={<BillingHistory />} />
-        </Route>
-        <Route path="/"element={<HomePage/>}/>
+    <>
 
-      </Routes>
-    </BrowserRouter>
+      <Authprovider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/"element={<HomePage/>}/>
+
+            <Route element={
+              <Privateroute>
+                <Layout />
+              </Privateroute>
+            }>
+              <Route path="/inventory" element={<InventoryPage />} />
+              <Route path="/profile-page" element={<ProfilePage />} />
+              <Route path="/chatbot" element={<Chatbot />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/billing" element={<BillingPage />} />
+              <Route path="/report" element={<Reports />} />
+              <Route path="/billinghistory" element={<BillingHistory />} />
+            </Route>
+          
+
+        </Routes>
+      </BrowserRouter>
+    </Authprovider>
+    
+    </>
   );
 }
 

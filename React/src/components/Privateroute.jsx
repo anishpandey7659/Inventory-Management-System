@@ -1,5 +1,5 @@
 import { useContext} from 'react'
-import { AuthContext } from './Authprovider'
+import { AuthContext } from '../Authprovider'
 import { Navigate } from 'react-router-dom'
 
 const Privateroute = ({children}) => {
@@ -7,7 +7,7 @@ const Privateroute = ({children}) => {
   return isLoggedIn? (
     children
   ):(
-    <Navigate to='/login/'/>
+    <Navigate to='/'/>
   )
 }
 

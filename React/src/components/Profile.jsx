@@ -46,6 +46,8 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     console.log('User logged out');
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
     // Add logout logic here
   };
 

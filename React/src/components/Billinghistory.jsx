@@ -51,12 +51,7 @@ const fetchInvoiceDetail = async (invoice) => {
 };
 
 
-
-
-
-
-
-  const invoices = (data?.results ?? data ?? []).map(sale => ({
+const invoices = (data?.results ?? data ?? []).map(sale => ({
   id: `INV-${sale.id}`,                      
   customer: sale.customer_name,              
   date:new Date(sale.date).toLocaleString("en-GB"),
@@ -72,11 +67,9 @@ const fetchInvoiceDetail = async (invoice) => {
   const end = Math.min(currentPage * pageSize, totalCount);
 
 
-console.log("Try: ",invoices .length)
 
 let Total_Invoices=data.length
 let Total_Revenue=total_revenue.data.total_revenue
-console.log(total_revenue.data.total_revenue);
 const paginatedInvoices =invoices.slice(
   (currentPage-1)* pageSize,
   currentPage * pageSize
