@@ -188,7 +188,7 @@ const calculateSubtotal = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 overflow-hidden">
           {/* Left Column - Customer Details & Add Items */}
-          <div className="space-y-4 overflow-y-auto pr-2">
+          <div className="space-y-4 pr-2 h-full overflow-hidden">
             {/* Customer Details Card */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
               <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -346,7 +346,7 @@ const calculateSubtotal = () => {
               </div>
 
               {/* Invoice Items - Scrollable */}
-              <div className="flex-1 overflow-y-auto p-4">
+              <div className="flex-1 p-4 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="border-b-2 border-gray-200 sticky top-0 bg-white">

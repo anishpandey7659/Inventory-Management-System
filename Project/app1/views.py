@@ -79,3 +79,21 @@ class ProtectedView(APIView):
             'status':'Request was permitted'
         }
         return Response(response)
+        
+
+from collections import defaultdict
+from rest_framework.response import Response
+
+@api_view(['GET'])
+def products_grouped_by_category(request):
+    queryset = Product.objects.select_related('category')
+
+    grouped = defaultdict(list)
+    for product in queryset:
+        grouped[product.category.name].append(
+            ProductSerializer(product).data
+        )
+
+    return Response(grouped)
+
+

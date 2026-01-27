@@ -48,9 +48,10 @@ export const createStockIn = (data) => axiosInstance.post('/stockin/', data);
 
 
 
-
 export const createsales = (data) => axiosInstance.post('/sales/', data);
 export const getsales = (params)=>axiosInstance.get('/sales/',params)
+
+export const products_grouped_by_category = ()=> axiosInstance.get('/products_grouped_by_category/');
 
 
 //Stats

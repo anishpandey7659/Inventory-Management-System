@@ -1,83 +1,161 @@
-import React, { useState,useEffect } from 'react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, TrendingDown, DollarSign, FileText, Package, Users, ShoppingCart, AlertCircle } from 'lucide-react';
-import { getsales,total_revenue,getProducts } from '../Apiservice';
-
-
+import React, { useState, useEffect } from 'react';
+import { LineChart, Line, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { TrendingUp, TrendingDown, DollarSign, Package, AlertTriangle, XCircle, Plus, Download, Upload, Scan, FileText, RefreshCw } from 'lucide-react';
+import { getsales, total_revenue, getProducts,products_grouped_by_category } from '../Apiservice';
+import { data, Link } from 'react-router-dom';
 
 const Dashboard = () => {
   const [Total_Revenue, setTotalRevenue] = useState(0);
   const [Bill, setBill] = useState(0);
-  const [Product,setProduct]=useState(0);
+  const [Product, setProduct] = useState(0);
+  const [data, setData] = useState(null);
+  const [categoryStats, setCategoryStats] = useState([]);
+
+
+
+
+useEffect(() => {
+  const fetchRevenue = async () => {
+    try {
+      const res = await total_revenue();
+      const resbill = await getsales();
+      const productRes = await getProducts();
+
+      setTotalRevenue(res.data.total_revenue);
+      setBill(resbill.data.count);
+      setProduct(productRes.data.count);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const loadData = async () => {
+    try {
+      const res = await products_grouped_by_category();
+      const groupedData = res.data;
+
+      setData(groupedData);
+
+      // 🔢 Convert to array with percentage
+      const counts = Object.entries(groupedData).map(
+        ([category, items]) => ({
+          category,
+          count: items.length,
+        })
+      );
+
+      const total = counts.reduce(
+        (sum, item) => sum + item.count,
+        0
+      );
+
+      const stats = counts.map(item => ({
+        ...item,
+        percentage: total
+          ? Number(((item.count / total) * 100).toFixed(1))
+          : 0,
+      }));
+      
+      stats.sort((a, b) => b.percentage - a.percentage);
+
+      setCategoryStats(stats);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchRevenue();
+  loadData();
+}, []);
+
   
-  useEffect(() => {
-    const fetchRevenue = async () => {
-      try {
-        const res = await total_revenue();
-        const resbill = await getsales();
-        const Productres = await getProducts();
-        setTotalRevenue(res.data.total_revenue);
-        setBill(resbill.data.count);
-        setProduct(Productres.data.count)
-      } catch (err) {
-        console.error(err);
-      }
-    };
+console.log(categoryStats);
 
-    fetchRevenue();
-  }, []);
-  // Revenue trend data
-  const revenueData = [
-    { month: 'Jan', revenue: 4200, invoices: 12 },
-    { month: 'Feb', revenue: 3800, invoices: 10 },
-    { month: 'Mar', revenue: 5100, invoices: 15 },
-    { month: 'Apr', revenue: 4600, invoices: 13 },
-    { month: 'May', revenue: 5400, invoices: 16 },
-    { month: 'Jun', revenue: 5389.95, invoices: 18 }
+const palette = [
+  "#3b82f6", "#10b981", "#f59e0b",
+  "#8b5cf6", "#ef4444", "#06b6d4",
+  "#f97316", "#a855f7", "#22c55e"
+];
+
+
+// Inventory by category
+const getColorFromPalette = (index) => palette[index % palette.length];
+const categoryData = categoryStats.map((item, idx) => ({
+  name: item.category,
+  value: item.count,
+  percentage: item.percentage,
+  color: getColorFromPalette(idx),
+}));
+
+
+
+  // Stock movement trend data
+  const stockMovementData = [
+    { month: 'Aug', added: 1200, sold: 950 },
+    { month: 'Sep', added: 1400, sold: 1100 },
+    { month: 'Oct', added: 1150, sold: 1250 },
+    { month: 'Nov', added: 1600, sold: 1350 },
+    { month: 'Dec', added: 1800, sold: 1650 },
+    { month: 'Jan', added: 1350, sold: 1300 }
   ];
 
-  // Invoice status data
-  const invoiceStatusData = [
-    { name: 'Paid', value: 3839.96, count: 3 },
-    { name: 'Pending', value: 1549.99, count: 2 }
+  
+  // Stock alerts
+  const stockAlerts = [
+    { name: 'USB-C Cable', sku: 'UC-002', quantity: 12, min: 100, status: 'low' },
+    { name: 'Mechanical Keyboard', sku: 'MK-003', quantity: 0, min: 25, status: 'out' },
+    { name: 'Standing Desk', sku: 'SD-005', quantity: 8, min: 15, status: 'low' },
+    { name: 'Webcam HD', sku: 'WC-007', quantity: 0, min: 30, status: 'out' },
+    { name: 'Pen Set', sku: 'PS-010', quantity: 45, min: 50, status: 'low' }
   ];
 
-  // Top customers
-  const topCustomers = [
-    { name: 'Alex Morgan', amount: 1850.50, invoices: 4 },
-    { name: 'Sarah Connor', amount: 1250.00, invoices: 3 },
-    { name: 'John Smith', amount: 980.75, invoices: 2 },
-    { name: 'Emma Wilson', amount: 759.70, invoices: 2 }
+  // Recent stock movements
+  const recentMovements = [
+    { id: 1, product: 'Wireless Mouse', code: 'PO-2024-001', change: '+50 units', date: '2024-01-15 09:30', type: 'in' },
+    { id: 2, product: 'USB-C Cable', code: 'SO-2024-089', change: '-25 units', date: '2024-01-15 11:45', type: 'out' },
+    { id: 3, product: 'Office Chair', code: 'PO-2024-002', change: '+10 units', date: '2024-01-14 14:20', type: 'in' },
+    { id: 4, product: 'Monitor 27"', code: 'SO-2024-090', change: '-5 units', date: '2024-01-14 16:00', type: 'out' },
+    { id: 5, product: 'Notebook A5', code: 'PO-2024-003', change: '+100 units', date: '2024-01-13 10:15', type: 'in' }
   ];
 
-  // Recent activities
-  const recentActivities = [
-    { id: 1, type: 'payment', customer: 'Alex Morgan', action: 'Payment received', amount: 459.97, time: '2 hours ago' },
-    { id: 2, type: 'invoice', customer: 'Sarah Connor', action: 'Invoice created', amount: 1250.00, time: '5 hours ago' },
-    { id: 3, type: 'inventory', customer: 'System', action: 'Low stock alert: Product ABC', amount: null, time: '1 day ago' },
-    { id: 4, type: 'payment', customer: 'John Smith', action: 'Payment received', amount: 320.50, time: '2 days ago' }
+  // Product inventory
+  const productInventory = [
+    { name: 'Wireless Mouse', sku: 'WM-001', category: 'Electronics', quantity: 145, min: 50, price: 29.99, status: 'in' },
+    { name: 'USB-C Cable', sku: 'UC-002', category: 'Electronics', quantity: 12, min: 100, price: 14.99, status: 'low' },
+    { name: 'Mechanical Keyboard', sku: 'MK-003', category: 'Electronics', quantity: 0, min: 25, price: 89.99, status: 'out' },
+    { name: 'Office Chair', sku: 'OC-004', category: 'Furniture', quantity: 34, min: 10, price: 199.99, status: 'in' },
+    { name: 'Standing Desk', sku: 'SD-005', category: 'Furniture', quantity: 8, min: 15, price: 449.99, status: 'low' },
+    { name: 'Monitor 27"', sku: 'MN-006', category: 'Electronics', quantity: 67, min: 20, price: 299.99, status: 'in' },
+    { name: 'Webcam HD', sku: 'WC-007', category: 'Electronics', quantity: 0, min: 30, price: 79.99, status: 'out' },
+    { name: 'Desk Lamp', sku: 'DL-008', category: 'Furniture', quantity: 89, min: 25, price: 34.99, status: 'in' },
+    { name: 'Notebook A5', sku: 'NB-009', category: 'Stationery', quantity: 234, min: 100, price: 4.99, status: 'in' }
   ];
 
-  const COLORS = ['#10b981', '#f59e0b'];
-
-  const StatCard = ({ title, value, icon: Icon, trend, trendValue, color, bgColor }) => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 rounded-lg ${bgColor}`}>
+  const StatCard = ({ title, value, icon: Icon, trend, trendValue, color, bgColor, subtitle }) => (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <h3 className="text-gray-600 text-sm font-medium mb-1">{title}</h3>
+          <p className="text-3xl font-bold text-gray-900">{value}</p>
+          {trend && (
+            <div className={`flex items-center gap-1 text-sm font-medium mt-2 ${trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-orange-600'}`}>
+              {trend === 'up' && <TrendingUp className="w-4 h-4" />}
+              {trend === 'down' && <TrendingDown className="w-4 h-4" />}
+              {trendValue}
+            </div>
+          )}
+          {subtitle && (
+            <p className={`text-sm font-medium mt-2 ${subtitle.includes('Critical') ? 'text-red-600' : 'text-orange-600'}`}>
+              {subtitle}
+            </p>
+          )}
+        </div>
+        <div className={`p-3 rounded-xl ${bgColor}`}>
           <Icon className={`w-6 h-6 ${color}`} />
         </div>
-        {trend && (
-          <div className={`flex items-center gap-1 text-sm font-medium ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-            {trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-            {trendValue}
-          </div>
-        )}
       </div>
-      <h3 className="text-gray-600 text-sm font-medium mb-1">{title}</h3>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
     </div>
   );
-
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -85,63 +163,66 @@ const Dashboard = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-          <p className="text-gray-600">Welcome back! Here's what's happening with your business.</p>
+          <p className="text-gray-600">Welcome back! Here's what's happening with your inventory.</p>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
-            title="Total Revenue"
-            value={ Total_Revenue}
-            icon={DollarSign}
-            trend="up"
-            trendValue="12.5%"
-            color="text-blue-600"
-            bgColor="bg-blue-50"
-          />
-          <StatCard
-            title="Total Invoices"
-            value={Bill}
-            icon={FileText}
-            trend="up"
-            trendValue="8.3%"
-            color="text-purple-600"
-            bgColor="bg-purple-50"
-          />
-          {/* <StatCard
-            title="Active Customers"
-            value="24"
-            icon={Users}
-            trend="up"
-            trendValue="5.2%"
-            color="text-green-600"
-            bgColor="bg-green-50"
-          /> */}
-          <StatCard
-            title="Inventory Items"
+            title="Total Products"
             value={Product}
             icon={Package}
-            trend="down"
-            trendValue="2.1%"
+            trend="up"
+            trendValue="+12% from last month"
+            color="text-blue-600"
+            bgColor="bg-blue-100"
+          />
+          <StatCard
+            title="Inventory Value"
+            value={`$${Total_Revenue}`}
+            icon={DollarSign}
+            trend="up"
+            trendValue="+8.2% from last month"
+            color="text-green-600"
+            bgColor="bg-green-100"
+          />
+          <StatCard
+            title="Low Stock Items"
+            value="4"
+            icon={AlertTriangle}
             color="text-orange-600"
-            bgColor="bg-orange-50"
+            bgColor="bg-yellow-100"
+            subtitle="Needs attention"
+          />
+          <StatCard
+            title="Out of Stock"
+            value="2"
+            icon={XCircle}
+            color="text-red-600"
+            bgColor="bg-red-100"
+            subtitle="Critical"
           />
         </div>
 
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Revenue Trend */}
-          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Revenue Trend</h2>
-              <select className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>Last 6 months</option>
-                <option>Last 3 months</option>
-                <option>This year</option>
-              </select>
+          {/* Stock Movement Trend */}
+          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-gray-900">Stock Movement Trend</h2>
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={revenueData}>
+              <AreaChart data={stockMovementData}>
+                <defs>
+                  <linearGradient id="colorAdded" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorSold" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="month" stroke="#6b7280" />
                 <YAxis stroke="#6b7280" />
@@ -149,44 +230,40 @@ const Dashboard = () => {
                   contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
                 />
                 <Legend />
-                <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 4 }} />
-              </LineChart>
+                <Area type="monotone" dataKey="added" stroke="#10b981" fillOpacity={1} fill="url(#colorAdded)" name="Added" />
+                <Area type="monotone" dataKey="sold" stroke="#3b82f6" fillOpacity={1} fill="url(#colorSold)" name="Sold/Used" />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Invoice Status */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Invoice Status</h2>
-            <ResponsiveContainer width="100%" height={300}>
+          {/* Inventory by Category */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">Inventory by Category</h2>
+            <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
-                  data={invoiceStatusData}
+                  data={categoryData}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={2}
                   dataKey="value"
                 >
-                  {invoiceStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  {categoryData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
-                  formatter={(value) => `$${value.toFixed(2)}`}
-                />
               </PieChart>
             </ResponsiveContainer>
             <div className="mt-4 space-y-2">
-              {invoiceStatusData.map((item, index) => (
+              {categoryData.map((item) => (
                 <div key={item.name} className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: COLORS[index] }}></div>
-                    <span className="text-gray-600">{item.name}</span>
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                    <span className="text-gray-700">{item.name}</span>
                   </div>
-                  <span className="font-semibold text-gray-900">${item.value.toFixed(2)}</span>
+                  <span className="font-semibold text-gray-900">{item.value}%</span>
                 </div>
               ))}
             </div>
@@ -194,60 +271,151 @@ const Dashboard = () => {
         </div>
 
         {/* Bottom Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Top Customers */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Top Customers</h2>
-            <div className="space-y-4">
-              {topCustomers.map((customer, index) => (
-                <div key={customer.name} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold">
-                      {customer.name.split(' ').map(n => n[0]).join('')}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{customer.name}</p>
-                      <p className="text-sm text-gray-500">{customer.invoices} invoices</p>
-                    </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Quick Actions */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <Link to='/inventory' className="flex items-center justify-center gap-2 bg-blue-600 text-white rounded-lg px-4 py-3 font-medium hover:bg-blue-700 transition-colors">
+                <Plus className="w-5 h-5" />
+                Add Product
+              </Link>
+              <Link to='/inventory' className="flex items-center justify-center gap-2 bg-green-600 text-white rounded-lg px-4 py-3 font-medium hover:bg-green-700 transition-colors">
+                <Download className="w-5 h-5" />
+                Stock In
+              </Link>
+              <Link to='/billing' className="flex items-center justify-center gap-2 bg-orange-600 text-white rounded-lg px-4 py-3 font-medium hover:bg-orange-700 transition-colors">
+                <Upload className="w-5 h-5" />
+                Stock Out
+              </Link>
+              <button className="flex items-center justify-center gap-2 bg-purple-600 text-white rounded-lg px-4 py-3 font-medium hover:bg-purple-700 transition-colors">
+                <Scan className="w-5 h-5" />
+                Scan Item
+              </button>
+              <button className="flex items-center justify-center gap-2 bg-gray-700 text-white rounded-lg px-4 py-3 font-medium hover:bg-gray-800 transition-colors">
+                <FileText className="w-5 h-5" />
+                Generate Report
+              </button>
+              <button className="flex items-center justify-center gap-2 bg-indigo-600 text-white rounded-lg px-4 py-3 font-medium hover:bg-indigo-700 transition-colors">
+                <RefreshCw className="w-5 h-5" />
+                Sync Data
+              </button>
+            </div>
+          </div>
+
+          {/* Stock Alerts */}
+          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-orange-600" />
+                <h2 className="text-lg font-semibold text-gray-900">Stock Alerts</h2>
+              </div>
+              <span className="text-sm font-medium text-red-600 bg-red-50 px-3 py-1 rounded-full">
+                {stockAlerts.length} items
+              </span>
+            </div>
+            <div className="space-y-3">
+              {stockAlerts.map((item, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">{item.name}</p>
+                    <p className="text-sm text-gray-500">{item.sku}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900">${customer.amount.toFixed(2)}</p>
+                    <p className={`text-lg font-bold ${item.status === 'out' ? 'text-red-600' : 'text-orange-600'}`}>
+                      {item.quantity} left
+                    </p>
+                    <p className="text-sm text-gray-500">Min: {item.min}</p>
+                  </div>
+                </div>
+              ))}
+              <button className="w-full py-3 text-orange-600 font-medium hover:bg-orange-50 rounded-lg transition-colors">
+                Create Restock Order
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Stock Movements & Product Inventory */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recent Stock Movements */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-gray-900">Recent Stock Movements</h2>
+              <button className="text-sm text-blue-600 font-medium hover:underline">View All</button>
+            </div>
+            <div className="space-y-3">
+              {recentMovements.map((movement) => (
+                <div key={movement.id} className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                  <div className={`p-2 rounded-lg ${movement.type === 'in' ? 'bg-green-100' : 'bg-red-100'}`}>
+                    {movement.type === 'in' ? (
+                      <TrendingDown className="w-5 h-5 text-green-600 rotate-180" />
+                    ) : (
+                      <TrendingUp className="w-5 h-5 text-red-600 rotate-180" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{movement.product}</p>
+                    <p className="text-xs text-gray-500">{movement.code}</p>
+                    <p className="text-xs text-gray-400 mt-1">{movement.date}</p>
+                  </div>
+                  <div className={`text-sm font-semibold ${movement.type === 'in' ? 'text-green-600' : 'text-red-600'}`}>
+                    {movement.change}
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Recent Activity */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Recent Activity</h2>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => {
-                const getActivityIcon = () => {
-                  switch(activity.type) {
-                    case 'payment': return <DollarSign className="w-5 h-5 text-green-600" />;
-                    case 'invoice': return <FileText className="w-5 h-5 text-blue-600" />;
-                    case 'inventory': return <AlertCircle className="w-5 h-5 text-orange-600" />;
-                    default: return <ShoppingCart className="w-5 h-5 text-gray-600" />;
-                  }
-                };
-
-                return (
-                  <div key={activity.id} className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div className="mt-1">{getActivityIcon()}</div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                      <p className="text-sm text-gray-500">{activity.customer}</p>
-                      <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
-                    </div>
-                    {activity.amount && (
-                      <div className="text-sm font-semibold text-gray-900">
-                        ${activity.amount.toFixed(2)}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+          {/* Product Inventory */}
+          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-gray-900">Product Inventory</h2>
+              <Link to='/inventory' className="flex items-center gap-2 bg-blue-600 text-white rounded-lg px-4 py-2 font-medium hover:bg-blue-700 transition-colors">
+                <Plus className="w-4 h-4" />
+                Add Product
+              </Link>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-2 text-sm font-semibold text-gray-600 uppercase">Product</th>
+                    <th className="text-left py-3 px-2 text-sm font-semibold text-gray-600 uppercase">SKU</th>
+                    <th className="text-left py-3 px-2 text-sm font-semibold text-gray-600 uppercase">Category</th>
+                    <th className="text-left py-3 px-2 text-sm font-semibold text-gray-600 uppercase">Quantity</th>
+                    <th className="text-left py-3 px-2 text-sm font-semibold text-gray-600 uppercase">Price</th>
+                    <th className="text-left py-3 px-2 text-sm font-semibold text-gray-600 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productInventory.map((product, index) => (
+                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-2 text-sm font-medium text-gray-900">{product.name}</td>
+                      <td className="py-3 px-2 text-sm text-gray-600">{product.sku}</td>
+                      <td className="py-3 px-2 text-sm text-gray-600">{product.category}</td>
+                      <td className="py-3 px-2">
+                        <span className="text-sm ">
+                          <span className={`font-semibold ${product.status === 'out' ? 'text-red-600' : product.status === 'low' ? 'text-orange-600' : 'text-gray-900'}`}>
+                            {product.quantity}
+                          </span>
+                          {/* <span className="text-gray-400"> / {product.min} min</span> */}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2 text-sm font-medium text-gray-900">${product.price}</td>
+                      <td className="py-3 px-2">
+                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                          product.status === 'in' ? 'bg-green-100 text-green-700' :
+                          product.status === 'low' ? 'bg-yellow-100 text-orange-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {product.status === 'in' ? 'In Stock' : product.status === 'low' ? 'Low Stock' : 'Out of Stock'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
