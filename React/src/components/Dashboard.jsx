@@ -1,18 +1,24 @@
 import React, { useState,useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, FileText, Package, Users, ShoppingCart, AlertCircle } from 'lucide-react';
-import { getsales,total_revenue } from '../Apiservice';
+import { getsales,total_revenue,getProducts } from '../Apiservice';
 
 
 
 const Dashboard = () => {
   const [Total_Revenue, setTotalRevenue] = useState(0);
+  const [Bill, setBill] = useState(0);
+  const [Product,setProduct]=useState(0);
   
   useEffect(() => {
     const fetchRevenue = async () => {
       try {
         const res = await total_revenue();
+        const resbill = await getsales();
+        const Productres = await getProducts();
         setTotalRevenue(res.data.total_revenue);
+        setBill(resbill.data.count);
+        setProduct(Productres.data.count)
       } catch (err) {
         console.error(err);
       }
@@ -72,6 +78,7 @@ const Dashboard = () => {
     </div>
   );
 
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -94,14 +101,14 @@ const Dashboard = () => {
           />
           <StatCard
             title="Total Invoices"
-            value="5"
+            value={Bill}
             icon={FileText}
             trend="up"
             trendValue="8.3%"
             color="text-purple-600"
             bgColor="bg-purple-50"
           />
-          <StatCard
+          {/* <StatCard
             title="Active Customers"
             value="24"
             icon={Users}
@@ -109,10 +116,10 @@ const Dashboard = () => {
             trendValue="5.2%"
             color="text-green-600"
             bgColor="bg-green-50"
-          />
+          /> */}
           <StatCard
             title="Inventory Items"
-            value="156"
+            value={Product}
             icon={Package}
             trend="down"
             trendValue="2.1%"

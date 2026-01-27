@@ -58,6 +58,7 @@ export const getsales = (params)=>axiosInstance.get('/sales/',params)
 export const total_revenue = () => api.get('revenue/');
 
 
+
 export default axiosInstance;
 
 

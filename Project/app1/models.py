@@ -160,7 +160,7 @@ class UserProfile(models.Model):
         (EMPLOYEE,'Employee'),
         ]
     
-    user =models.models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
+    user =models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
     role =models.CharField(max_length=50,choices=ROLE_CHOICE,default=EMPLOYEE)
     phone=models.CharField(max_length=15,blank=True,null=True)
 
