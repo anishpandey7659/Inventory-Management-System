@@ -31,8 +31,8 @@ const AddProductModal = ({ isOpen, onClose, head, mode = "add", product = null }
   const profit = purchasePrice && sellingPrice ? (sellingPrice - purchasePrice).toFixed(2) : 0;
   const profitMargin = purchasePrice ? (((sellingPrice - purchasePrice) / purchasePrice) * 100).toFixed(2) : 0;
   const isEdit = mode === "edit"
-  // console.log("That s is ",data);
-  // Prefill form when editing
+
+  
   useEffect(() => {
     if (mode === "edit" && product) {
       setName(product.product_name);

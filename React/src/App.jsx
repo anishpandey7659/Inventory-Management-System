@@ -28,7 +28,6 @@ function App() {
             }>
               <Route path="/inventory" element={<InventoryPage />} />
               <Route path="/profile-page" element={<ProfilePage />} />
-              <Route path="/chatbot" element={<Chatbot />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/billing" element={<BillingPage />} />
               <Route path="/report" element={<Reports />} />

@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Package, Menu, X, TrendingUp, BarChart, Shield, Smartphone, PieChart, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram, Check } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from '../Authprovider';
+
 
 export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,6 +15,9 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   const [isLogin, setIsLogin] = useState(true);
+  const { setIsLoggedIn } = useContext(AuthContext);
+
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -135,8 +141,9 @@ const handleLogin = async (e) => {
     localStorage.setItem('refreshToken', response.data.refresh);
     
     console.log("Login Successful");
+    setIsLoggedIn(true); 
     navigate('/dashboard');
-    setIsLogin(true)
+
     
   } catch (error) {
     // console.error("Login error:", error);

@@ -3,6 +3,7 @@ from django.db.models import F,Sum
 from decimal import Decimal
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 # Create your models here.
 
 
@@ -149,3 +150,19 @@ class SaleItem(models.Model):
             super().delete(*args, **kwargs)
 
         self.sale.update_totals()
+
+class UserProfile(models.Model):
+    ADMIN='admin'
+    EMPLOYEE='employee'
+
+    ROLE_CHOICE =[
+        (ADMIN,'Admin'),
+        (EMPLOYEE,'Employee'),
+        ]
+    
+    user =models.models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
+    role =models.CharField(max_length=50,choices=ROLE_CHOICE,default=EMPLOYEE)
+    phone=models.CharField(max_length=15,blank=True,null=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role}"

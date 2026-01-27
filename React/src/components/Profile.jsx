@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { User, Mail, Phone, MapPin, Building, Calendar, Camera, Save, Edit2, Lock, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -13,6 +15,7 @@ export default function ProfilePage() {
     role: 'Administrator',
     joinDate: 'January 2024'
   });
+  const navigate = useNavigate();
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -48,6 +51,7 @@ export default function ProfilePage() {
     console.log('User logged out');
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+    navigate('/')
     // Add logout logic here
   };
 

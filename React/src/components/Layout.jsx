@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { NavLink , Outlet,useLocation} from "react-router-dom";
 import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+
 
 const Layout = ({ children }) => {
   const [activeItem, setActiveItem] = useState('Dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const navigate = useNavigate();
 
 const location = useLocation();
 
@@ -16,6 +19,13 @@ const getTitle = () => {
   if (path === "/billing") return "Billing";
   return "Dashboard";
 };
+  const handleLogout = () => {
+    console.log('User logged out');
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    navigate('/')
+    // Add logout logic here
+  };
 
 
 return (
@@ -102,27 +112,12 @@ return (
             <span className="text-xl">📄</span>
             <span>Report</span>
           </NavLink>
-           <NavLink
-            to="/chatbot"
-            className={({ isActive }) =>
-              `w-full flex items-center gap-3.5 py-3.5 px-4 mb-2 border-none rounded-[10px]
-              text-base font-medium cursor-pointer transition-all duration-200 text-left
-              ${
-                isActive
-                  ? "bg-slate-700 text-blue-400"
-                  : "bg-transparent text-slate-400 hover:bg-gray-700"
-              }`
-            }
-          >
-            <span className="text-xl">🤖</span>
-            <span>Chatbot</span>
-          </NavLink>
         </nav>
       </div>
 
       {/* Bottom Section - Logout */}
       <div className="px-4">
-        <button 
+        <button onClick={handleLogout}
           className="w-full flex items-center gap-3.5 py-3.5 px-4 bg-transparent border-none rounded-[10px] text-slate-400 text-base font-medium cursor-pointer transition-all duration-200 hover:bg-gray-700 hover:text-red-400"
         >
           <span className="text-xl">🚪</span>

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Download, Trash2, FileText, Plus, TrendingUp, TrendingDown, Package, ShoppingCart, Users } from 'lucide-react';
 import { getsales,total_revenue } from '../Apiservice';
 
 
-let Total_Revenue=total_revenue.data.total_revenue
+
 
 const Reports = () => {
   const [reports, setReports] = useState([
@@ -40,6 +40,19 @@ const Reports = () => {
       icon: '📄'
     }
   ]);
+    const [Total_Revenue, setTotalRevenue] = useState(0);
+    useEffect(() => {
+      const fetchRevenue = async () => {
+        try {
+          const res = await total_revenue();
+          setTotalRevenue(res.data.total_revenue);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+  
+      fetchRevenue();
+    }, []);
 
   const stats = [
     {

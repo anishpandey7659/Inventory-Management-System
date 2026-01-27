@@ -1,11 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, FileText, Package, Users, ShoppingCart, AlertCircle } from 'lucide-react';
 import { getsales,total_revenue } from '../Apiservice';
 
 
-let Total_Revenue=total_revenue.data.total_revenue
+
 const Dashboard = () => {
+  const [Total_Revenue, setTotalRevenue] = useState(0);
+  
+  useEffect(() => {
+    const fetchRevenue = async () => {
+      try {
+        const res = await total_revenue();
+        setTotalRevenue(res.data.total_revenue);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchRevenue();
+  }, []);
   // Revenue trend data
   const revenueData = [
     { month: 'Jan', revenue: 4200, invoices: 12 },

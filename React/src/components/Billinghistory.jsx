@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Search, Eye, Download, Printer, Plus, FileText, DollarSign, CheckCircle, Clock } from 'lucide-react';
 import { Link } from "react-router-dom";
 import { useFetch } from "../UseHook";
@@ -17,6 +17,21 @@ const BillingHistory = () => {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [productNames, setProductNames] = useState({});
   const pageSize = 10;
+  const [Total_Revenue, setTotalRevenue] = useState(0);
+  
+  useEffect(() => {
+        const fetchRevenue = async () => {
+          try {
+            const res = await total_revenue();
+            setTotalRevenue(res.data.total_revenue);
+          } catch (err) {
+            console.error(err);
+          }
+        };
+    
+        fetchRevenue();
+      }, []);
+  
 
 const fetchInvoiceDetail = async (invoice) => {
   setLoadingDetail(true);
@@ -69,7 +84,6 @@ const invoices = (data?.results ?? data ?? []).map(sale => ({
 
 
 let Total_Invoices=data.length
-let Total_Revenue=total_revenue.data.total_revenue
 const paginatedInvoices =invoices.slice(
   (currentPage-1)* pageSize,
   currentPage * pageSize
