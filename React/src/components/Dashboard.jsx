@@ -79,9 +79,28 @@ useEffect(() => {
 if (!status.low_stock || !status.out_stock || !status.in_stock) {
   return <p>Loading stock data...</p>;
 }
-console.log('hoho:', status);
-  
-console.log(categoryStats);
+
+
+const lowStockAlerts = status.low_stock.results.map(item => ({
+  name: item.product_name,
+  sku: `SKU-${item.sku}`,  
+  quantity: item.quantity,
+  status: 'low'
+}));
+
+
+const outStockAlerts = status.out_stock.results.map(item => ({
+  name: item.product_name,
+  sku: `SKU-${item.sku}`,
+  quantity: item.quantity,
+  status: 'out'
+}));
+
+console.log("Ths is outstock: ",outStockAlerts);
+
+const stockAlerts = [ ...outStockAlerts,...lowStockAlerts];
+
+
 
 const palette = [
   "#3b82f6", "#10b981", "#f59e0b",
@@ -112,14 +131,7 @@ const categoryData = categoryStats.map((item, idx) => ({
   ];
 
   
-  // Stock alerts
-  const stockAlerts = [
-    { name: 'USB-C Cable', sku: 'UC-002', quantity: 12, min: 100, status: 'low' },
-    { name: 'Mechanical Keyboard', sku: 'MK-003', quantity: 0, min: 25, status: 'out' },
-    { name: 'Standing Desk', sku: 'SD-005', quantity: 8, min: 15, status: 'low' },
-    { name: 'Webcam HD', sku: 'WC-007', quantity: 0, min: 30, status: 'out' },
-    { name: 'Pen Set', sku: 'PS-010', quantity: 45, min: 50, status: 'low' }
-  ];
+
 
   // Recent stock movements
   const recentMovements = [

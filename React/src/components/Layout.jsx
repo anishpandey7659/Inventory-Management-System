@@ -13,7 +13,6 @@ const Layout = ({ children }) => {
     const path = location.pathname;
     if (path === "/" || path === "/dashboard") return "Dashboard";
     if (path === "/inventory") return "Inventory";
-    if (path === "/stock-levels") return "Stock Levels";
     if (path === "/movements") return "Movements";
     if (path === "/billing") return "Billing";
     if (path === "/suppliers") return "Suppliers";
@@ -95,7 +94,7 @@ const Layout = ({ children }) => {
               <span>Products</span>
             </NavLink>
 
-            <NavLink
+            {/* <NavLink
               to="/stock-levels"
               className={({ isActive }) =>
                 `w-full flex items-center gap-3 py-2.5 px-3 mb-1 border-none rounded-lg
@@ -111,10 +110,10 @@ const Layout = ({ children }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
               <span>Stock Levels</span>
-            </NavLink>
+            </NavLink> */}
 
             <NavLink
-              to="/movements"
+              to="/billinghistory"
               className={({ isActive }) =>
                 `w-full flex items-center gap-3 py-2.5 px-3 mb-1 border-none rounded-lg
                 text-[15px] font-medium cursor-pointer transition-all duration-200 text-left

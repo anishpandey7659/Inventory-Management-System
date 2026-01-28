@@ -10,7 +10,7 @@ import ProfilePage from "./components/Profile";
 import HomePage from "./components/Homepage";
 import Authprovider from "./Authprovider";
 import Privateroute from "./components/Privateroute";
-
+import SuppliersManagement from "./components/Suppliers management";
 
 function App() {
   return (
@@ -32,6 +32,7 @@ function App() {
               <Route path="/billing" element={<BillingPage />} />
               <Route path="/report" element={<Reports />} />
               <Route path="/billinghistory" element={<BillingHistory />} />
+              <Route path="/suppliers" element={<SuppliersManagement />} />
             </Route>
           
 

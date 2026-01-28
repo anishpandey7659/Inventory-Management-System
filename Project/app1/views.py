@@ -28,7 +28,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         qs = Product.objects.annotate(
             stock_status=Case(
                 When(quantity=0, then=Value("out_stock")),
-                When(quantity__lte=5, then=Value("low_stock")),
+                When(quantity__lte=20, then=Value("low_stock")),
                 default=Value("in_stock"),
                 output_field=CharField(),
             )
