@@ -57,7 +57,9 @@ class StockInViewSet(viewsets.ModelViewSet):
     search_fields = ['product__product_name','supplier__name']
 
 class SaleViewSet(viewsets.ModelViewSet):
-    queryset = Sale.objects.all().prefetch_related("items")
+    queryset = Sale.objects.all() \
+        .prefetch_related("items") \
+        .order_by("-date")
     serializer_class = SaleSerializer
 
 
