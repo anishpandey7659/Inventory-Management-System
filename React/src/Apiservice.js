@@ -14,7 +14,7 @@ const api = axios.create({
 // Products
 const buildQueryParams = (filters) => {
   return Object.fromEntries(
-    Object.entries(filters).filter(([_, value]) => value !== '' && value !== null)
+    Object.entries(filters).filter(([_, value]) => value !== '' && value !== null && value !== undefined )
   );
 };
 export const getProducts = (filters = {}, page = 1) => {
@@ -57,6 +57,8 @@ export const products_grouped_by_category = ()=> axiosInstance.get('/products_gr
 //Stats
 // export const total_revenue = () => axiosInstance.get('/revenue/');
 export const total_revenue = () => api.get('revenue/');
+
+
 
 
 

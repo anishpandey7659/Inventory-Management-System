@@ -35,6 +35,14 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.product_name} - ({self.sku})"
+    
+    @property
+    def status(self):
+        if self.quantity <= 0:
+            return "Out of Stock"
+        elif self.quantity <= 10:
+            return "Low Stock"
+        return "In Stock"
 
     
 

@@ -5,7 +5,7 @@ from .serializers import ProductSerializer,CategorySerializer,SupplierSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProductFilter,StockInFilter
 from rest_framework.filters import SearchFilter
-from django.db.models import Sum, F
+from django.db.models import Sum, F,Case, When, Value, CharField
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -21,6 +21,23 @@ class ProductViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend,SearchFilter]
     filterset_class = ProductFilter
     search_fields = ['product_name']
+    
+    def get_queryset(self):
+        status = self.request.query_params.get("status")
+
+        qs = Product.objects.annotate(
+            stock_status=Case(
+                When(quantity=0, then=Value("out_stock")),
+                When(quantity__lte=5, then=Value("low_stock")),
+                default=Value("in_stock"),
+                output_field=CharField(),
+            )
+        )
+
+        if status:
+            qs = qs.filter(stock_status=status)
+
+        return qs
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

@@ -10,7 +10,8 @@ const Dashboard = () => {
   const [Product, setProduct] = useState(0);
   const [data, setData] = useState(null);
   const [categoryStats, setCategoryStats] = useState([]);
-
+  const [status,setstatus] =useState([]) 
+  const statuses = ["low_stock", "out_stock", "in_stock"];
 
 
 
@@ -20,10 +21,18 @@ useEffect(() => {
       const res = await total_revenue();
       const resbill = await getsales();
       const productRes = await getProducts();
+      const results = await Promise.all(
+      statuses.map(status => getProducts({ status }))
+      );
 
       setTotalRevenue(res.data.total_revenue);
       setBill(resbill.data.count);
       setProduct(productRes.data.count);
+      setstatus({
+        low_stock: results[0].data,   // ✅ extract data here
+        out_stock: results[1].data,
+        in_stock: results[2].data,
+      });
     } catch (err) {
       console.error(err);
     }
@@ -67,7 +76,10 @@ useEffect(() => {
   fetchRevenue();
   loadData();
 }, []);
-
+if (!status.low_stock || !status.out_stock || !status.in_stock) {
+  return <p>Loading stock data...</p>;
+}
+console.log('hoho:', status);
   
 console.log(categoryStats);
 
@@ -188,7 +200,7 @@ const categoryData = categoryStats.map((item, idx) => ({
           />
           <StatCard
             title="Low Stock Items"
-            value="4"
+            value={status.low_stock.count}
             icon={AlertTriangle}
             color="text-orange-600"
             bgColor="bg-yellow-100"
@@ -196,7 +208,7 @@ const categoryData = categoryStats.map((item, idx) => ({
           />
           <StatCard
             title="Out of Stock"
-            value="2"
+            value={status.out_stock.count}
             icon={XCircle}
             color="text-red-600"
             bgColor="bg-red-100"
@@ -325,7 +337,7 @@ const categoryData = categoryStats.map((item, idx) => ({
                     <p className={`text-lg font-bold ${item.status === 'out' ? 'text-red-600' : 'text-orange-600'}`}>
                       {item.quantity} left
                     </p>
-                    <p className="text-sm text-gray-500">Min: {item.min}</p>
+                    {/* <p className="text-sm text-gray-500">Min: {item.min}</p> */}
                   </div>
                 </div>
               ))}
@@ -342,7 +354,7 @@ const categoryData = categoryStats.map((item, idx) => ({
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Recent Stock Movements</h2>
-              <button className="text-sm text-blue-600 font-medium hover:underline">View All</button>
+              <Link to='/billinghistory' className="text-sm text-blue-600 font-medium hover:underline">View All</Link>
             </div>
             <div className="space-y-3">
               {recentMovements.map((movement) => (
