@@ -143,9 +143,12 @@ It provides quick answers and supports the following:
     │   │   └── ...
     │   └── ...
     └── README.md
+
+
 # 📸 Screenshots:
-![Dashboard](dashboard.png)
-![Dashboard](assest/Addproduct.png)
+![Dashboard](assest/dashboard.png)
+![Dashboard](assest/billinghistory.png)
+![Dashboard](assest/Billing.png)
 ![Dashboard](assest/report.png)
 
 # 🚧 Project Status
