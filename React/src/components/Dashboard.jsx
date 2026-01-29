@@ -8,6 +8,7 @@ const Dashboard = () => {
   const [Total_Revenue, setTotalRevenue] = useState(0);
   const [Bill, setBill] = useState(0);
   const [Product, setProduct] = useState(0);
+  const [Productdetail, setProductdetail] = useState(0);
   const [data, setData] = useState(null);
   const [categoryStats, setCategoryStats] = useState([]);
   const [status,setstatus] =useState([]) 
@@ -33,6 +34,7 @@ useEffect(() => {
         out_stock: results[1].data,
         in_stock: results[2].data,
       });
+      setProductdetail(productRes.data.results);
     } catch (err) {
       console.error(err);
     }
@@ -96,7 +98,7 @@ const outStockAlerts = status.out_stock.results.map(item => ({
   status: 'out'
 }));
 
-console.log("Ths is outstock: ",outStockAlerts);
+// console.log("Ths is outstock: ",outStockAlerts);
 
 const stockAlerts = [ ...outStockAlerts,...lowStockAlerts];
 
@@ -141,19 +143,19 @@ const categoryData = categoryStats.map((item, idx) => ({
     { id: 4, product: 'Monitor 27"', code: 'SO-2024-090', change: '-5 units', date: '2024-01-14 16:00', type: 'out' },
     { id: 5, product: 'Notebook A5', code: 'PO-2024-003', change: '+100 units', date: '2024-01-13 10:15', type: 'in' }
   ];
-
-  // Product inventory
-  const productInventory = [
-    { name: 'Wireless Mouse', sku: 'WM-001', category: 'Electronics', quantity: 145, min: 50, price: 29.99, status: 'in' },
-    { name: 'USB-C Cable', sku: 'UC-002', category: 'Electronics', quantity: 12, min: 100, price: 14.99, status: 'low' },
-    { name: 'Mechanical Keyboard', sku: 'MK-003', category: 'Electronics', quantity: 0, min: 25, price: 89.99, status: 'out' },
-    { name: 'Office Chair', sku: 'OC-004', category: 'Furniture', quantity: 34, min: 10, price: 199.99, status: 'in' },
-    { name: 'Standing Desk', sku: 'SD-005', category: 'Furniture', quantity: 8, min: 15, price: 449.99, status: 'low' },
-    { name: 'Monitor 27"', sku: 'MN-006', category: 'Electronics', quantity: 67, min: 20, price: 299.99, status: 'in' },
-    { name: 'Webcam HD', sku: 'WC-007', category: 'Electronics', quantity: 0, min: 30, price: 79.99, status: 'out' },
-    { name: 'Desk Lamp', sku: 'DL-008', category: 'Furniture', quantity: 89, min: 25, price: 34.99, status: 'in' },
-    { name: 'Notebook A5', sku: 'NB-009', category: 'Stationery', quantity: 234, min: 100, price: 4.99, status: 'in' }
-  ];
+  const test =Productdetail.map((item)=>({
+    name:item.product_name,
+    sku:item.sku,
+    category:item.category.name,
+    quantity:item.quantity,
+    price:item.selling_price,
+    status:item.quantity > 10
+            ? "in"
+            : item.quantity > 0
+            ? "low"
+            : "out",
+  }
+  ));
 
   const StatCard = ({ title, value, icon: Icon, trend, trendValue, color, bgColor, subtitle }) => (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
@@ -413,7 +415,7 @@ const categoryData = categoryStats.map((item, idx) => ({
                   </tr>
                 </thead>
                 <tbody>
-                  {productInventory.map((product, index) => (
+                  {test.map((product, index) => (
                     <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="py-3 px-2 text-sm font-medium text-gray-900">{product.name}</td>
                       <td className="py-3 px-2 text-sm text-gray-600">{product.sku}</td>

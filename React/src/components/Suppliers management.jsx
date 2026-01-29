@@ -119,162 +119,70 @@ const SuppliersManagement = () => {
   const totalOutstanding = suppliers.reduce((sum, s) => sum + s.outstandingPayment, 0);
 
   const getRatingColor = (rating) => {
-    if (rating >= 4.5) return '#10B981';
-    if (rating >= 4.0) return '#3B82F6';
-    if (rating >= 3.5) return '#F59E0B';
-    return '#EF4444';
+    if (rating >= 4.5) return 'text-emerald-500 bg-emerald-500';
+    if (rating >= 4.0) return 'text-blue-500 bg-blue-500';
+    if (rating >= 3.5) return 'text-amber-500 bg-amber-500';
+    return 'text-red-500 bg-red-500';
   };
 
   const getStatusBadge = (status) => {
     return status === 'active' 
-      ? { bg: '#D1FAE5', color: '#059669', label: 'Active' }
-      : { bg: '#FEE2E2', color: '#DC2626', label: 'Inactive' };
+      ? { bg: 'bg-emerald-100', color: 'text-emerald-700', label: 'Active' }
+      : { bg: 'bg-red-100', color: 'text-red-700', label: 'Inactive' };
   };
 
+  const statCards = [
+    { label: 'Active Suppliers', value: activeSuppliers, icon: Package, color: 'text-emerald-500', bgColor: 'bg-emerald-500', subtext: `${suppliers.length} total` },
+    { label: 'Total Purchases', value: `$${(totalPurchases / 1000).toFixed(0)}K`, icon: DollarSign, color: 'text-blue-500', bgColor: 'bg-blue-500', subtext: 'All time' },
+    { label: 'Average Rating', value: avgRating, icon: Star, color: 'text-amber-500', bgColor: 'bg-amber-500', subtext: 'Out of 5.0' },
+    { label: 'Outstanding Payments', value: `$${(totalOutstanding / 1000).toFixed(1)}K`, icon: AlertCircle, color: 'text-red-500', bgColor: 'bg-red-500', subtext: 'Pending' }
+  ];
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#f8f9fa',
-      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif'
-    }}>
+    <div className="min-h-screen bg-gray-50 font-sans">
       {/* Header */}
-      <div style={{
-        background: 'white',
-        borderBottom: '1px solid #e5e7eb',
-        padding: '20px 40px',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '1600px',
-          margin: '0 auto'
-        }}>
+      <div className="bg-white border-b border-gray-200 px-10 py-5 sticky top-0 z-50">
+        <div className="max-w-screen-2xl mx-auto flex justify-between items-center">
           <div>
-            <h1 style={{
-              fontSize: '28px',
-              fontWeight: '600',
-              color: '#1f2937',
-              margin: 0,
-              marginBottom: '4px'
-            }}>
+            <h1 className="text-3xl font-semibold text-gray-800 mb-1">
               Suppliers
             </h1>
-            <p style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              margin: 0
-            }}>
+            <p className="text-sm text-gray-500">
               Manage your supplier relationships and purchase orders
             </p>
           </div>
           <button 
             onClick={() => setShowAddModal(true)}
-            style={{
-              padding: '12px 24px',
-              background: '#2563eb',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 1px 3px rgba(37, 99, 235, 0.3)'
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = '#1d4ed8';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 4px 8px rgba(37, 99, 235, 0.4)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = '#2563eb';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 1px 3px rgba(37, 99, 235, 0.3)';
-            }}>
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium cursor-pointer flex items-center gap-2 transition-all duration-200 shadow-md shadow-blue-600/30 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-600/40"
+          >
             <Plus size={18} />
             Add Supplier
           </button>
         </div>
       </div>
 
-      <div style={{
-        maxWidth: '1600px',
-        margin: '0 auto',
-        padding: '30px 40px'
-      }}>
+      <div className="max-w-screen-2xl mx-auto px-10 py-8">
         {/* Stats Cards */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: '20px',
-          marginBottom: '30px'
-        }}>
-          {[
-            { label: 'Active Suppliers', value: activeSuppliers, icon: Package, color: '#10B981', subtext: `${suppliers.length} total` },
-            { label: 'Total Purchases', value: `$${(totalPurchases / 1000).toFixed(0)}K`, icon: DollarSign, color: '#3B82F6', subtext: 'All time' },
-            { label: 'Average Rating', value: avgRating, icon: Star, color: '#F59E0B', subtext: 'Out of 5.0' },
-            { label: 'Outstanding Payments', value: `$${(totalOutstanding / 1000).toFixed(1)}K`, icon: AlertCircle, color: '#EF4444', subtext: 'Pending' }
-          ].map((stat, idx) => (
-            <div key={idx} style={{
-              background: 'white',
-              borderRadius: '12px',
-              padding: '24px',
-              border: '1px solid #e5e7eb',
-              transition: 'all 0.3s ease',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.1)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{
-                    fontSize: '13px',
-                    color: '#6b7280',
-                    marginBottom: '8px',
-                    fontWeight: '500',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+          {statCards.map((stat, idx) => (
+            <div 
+              key={idx} 
+              className="bg-white rounded-xl p-6 border border-gray-200 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wider">
                     {stat.label}
                   </div>
-                  <div style={{
-                    fontSize: '32px',
-                    fontWeight: '700',
-                    color: stat.color,
-                    marginBottom: '4px'
-                  }}>
+                  <div className={`text-3xl font-bold ${stat.color} mb-1`}>
                     {stat.value}
                   </div>
-                  <div style={{
-                    fontSize: '12px',
-                    color: '#9ca3af'
-                  }}>
+                  <div className="text-xs text-gray-400">
                     {stat.subtext}
                   </div>
                 </div>
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '12px',
-                  background: `${stat.color}15`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <stat.icon size={24} color={stat.color} />
+                <div className={`w-12 h-12 rounded-xl ${stat.bgColor} bg-opacity-10 flex items-center justify-center`}>
+                  <stat.icon size={24} className={stat.color} />
                 </div>
               </div>
             </div>
@@ -282,61 +190,23 @@ const SuppliersManagement = () => {
         </div>
 
         {/* Search and Filter */}
-        <div style={{
-          background: 'white',
-          borderRadius: '12px',
-          padding: '20px',
-          marginBottom: '20px',
-          border: '1px solid #e5e7eb',
-          display: 'flex',
-          gap: '12px',
-          alignItems: 'center',
-          flexWrap: 'wrap'
-        }}>
-          <div style={{
-            flex: '1',
-            minWidth: '300px',
-            position: 'relative'
-          }}>
-            <Search size={18} color="#9ca3af" style={{
-              position: 'absolute',
-              left: '14px',
-              top: '50%',
-              transform: 'translateY(-50%)'
-            }} />
+        <div className="bg-white rounded-xl p-5 mb-5 border border-gray-200 flex gap-3 items-center flex-wrap">
+          <div className="flex-1 min-w-[300px] relative">
+            <Search size={18} className="text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search suppliers, contacts, emails..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 14px 10px 42px',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                fontSize: '14px',
-                outline: 'none',
-                transition: 'all 0.2s ease'
-              }}
-              onFocus={e => e.currentTarget.style.borderColor = '#2563eb'}
-              onBlur={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+              className="w-full py-2.5 pl-11 pr-3.5 border border-gray-200 rounded-lg text-sm outline-none transition-all duration-200 focus:border-blue-600"
             />
           </div>
 
           <select
             value={filterStatus}
             onChange={e => setFilterStatus(e.target.value)}
-            style={{
-              padding: '10px 14px',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              fontSize: '14px',
-              outline: 'none',
-              background: 'white',
-              color: '#374151',
-              cursor: 'pointer',
-              fontWeight: '500'
-            }}>
+            className="py-2.5 px-3.5 border border-gray-200 rounded-lg text-sm outline-none bg-white text-gray-700 cursor-pointer font-medium"
+          >
             <option value="all">All Status</option>
             <option value="active">Active Only</option>
             <option value="inactive">Inactive Only</option>
@@ -344,232 +214,97 @@ const SuppliersManagement = () => {
         </div>
 
         {/* Suppliers Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))',
-          gap: '20px'
-        }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
           {filteredSuppliers.map((supplier) => {
             const statusBadge = getStatusBadge(supplier.status);
             const ratingColor = getRatingColor(supplier.rating);
 
             return (
-              <div key={supplier.id} style={{
-                background: 'white',
-                borderRadius: '12px',
-                border: '1px solid #e5e7eb',
-                overflow: 'hidden',
-                transition: 'all 0.3s ease',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.1)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}>
+              <div 
+                key={supplier.id} 
+                className="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl"
+              >
                 {/* Card Header */}
-                <div style={{
-                  padding: '20px',
-                  borderBottom: '1px solid #f3f4f6'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    marginBottom: '12px'
-                  }}>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{
-                        fontSize: '18px',
-                        fontWeight: '600',
-                        color: '#1f2937',
-                        margin: 0,
-                        marginBottom: '4px'
-                      }}>
+                <div className="p-5 border-b border-gray-100">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-1">
                         {supplier.name}
                       </h3>
-                      <div style={{
-                        fontSize: '13px',
-                        color: '#6b7280',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}>
+                      <div className="text-xs text-gray-500 flex items-center gap-1.5">
                         <Package size={13} />
                         {supplier.productsSupplied.length} products
                       </div>
                     </div>
-                    <div style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      background: statusBadge.bg,
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      color: statusBadge.color
-                    }}>
-                      <div style={{
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '50%',
-                        background: statusBadge.color
-                      }} />
+                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md ${statusBadge.bg} text-xs font-semibold ${statusBadge.color}`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${statusBadge.color.replace('text-', 'bg-')}`} />
                       {statusBadge.label}
                     </div>
                   </div>
 
                   {/* Rating */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginTop: '12px'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      padding: '4px 10px',
-                      background: `${ratingColor}15`,
-                      borderRadius: '6px'
-                    }}>
-                      <Star size={14} fill={ratingColor} color={ratingColor} />
-                      <span style={{
-                        fontSize: '14px',
-                        fontWeight: '700',
-                        color: ratingColor
-                      }}>
+                  <div className="flex items-center gap-2 mt-3">
+                    <div className={`flex items-center gap-1 px-2.5 py-1 ${ratingColor.replace('text-', 'bg-').replace('bg-', 'bg-').replace('500', '500/10')} rounded-md`}>
+                      <Star size={14} className={ratingColor.split(' ')[0]} fill="currentColor" />
+                      <span className={`text-sm font-bold ${ratingColor.split(' ')[0]}`}>
                         {supplier.rating}
                       </span>
                     </div>
-                    <div style={{
-                      fontSize: '12px',
-                      color: '#6b7280'
-                    }}>
+                    <div className="text-xs text-gray-500">
                       {supplier.onTimeDelivery}% on-time delivery
                     </div>
                   </div>
                 </div>
 
                 {/* Contact Info */}
-                <div style={{
-                  padding: '16px 20px',
-                  background: '#f9fafb',
-                  fontSize: '13px',
-                  color: '#6b7280'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '8px'
-                  }}>
-                    <Phone size={14} color="#6b7280" />
+                <div className="px-5 py-4 bg-gray-50 text-xs text-gray-500">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Phone size={14} className="text-gray-500" />
                     <span>{supplier.contactPerson}</span>
-                    <span style={{ color: '#d1d5db' }}>•</span>
+                    <span className="text-gray-300">•</span>
                     <span>{supplier.phone}</span>
                   </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '8px'
-                  }}>
-                    <Mail size={14} color="#6b7280" />
+                  <div className="flex items-center gap-2 mb-2">
+                    <Mail size={14} className="text-gray-500" />
                     <span>{supplier.email}</span>
                   </div>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '8px'
-                  }}>
-                    <MapPin size={14} color="#6b7280" style={{ marginTop: '2px', flexShrink: 0 }} />
-                    <span style={{ lineHeight: '1.4' }}>{supplier.address}</span>
+                  <div className="flex items-start gap-2">
+                    <MapPin size={14} className="text-gray-500 mt-0.5 flex-shrink-0" />
+                    <span className="leading-relaxed">{supplier.address}</span>
                   </div>
                 </div>
 
                 {/* Stats */}
-                <div style={{
-                  padding: '16px 20px',
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '16px',
-                  borderTop: '1px solid #f3f4f6'
-                }}>
+                <div className="px-5 py-4 grid grid-cols-2 gap-4 border-t border-gray-100">
                   <div>
-                    <div style={{
-                      fontSize: '11px',
-                      color: '#9ca3af',
-                      marginBottom: '4px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
+                    <div className="text-[11px] text-gray-400 mb-1 uppercase tracking-wider">
                       Total Orders
                     </div>
-                    <div style={{
-                      fontSize: '20px',
-                      fontWeight: '700',
-                      color: '#1f2937'
-                    }}>
+                    <div className="text-xl font-bold text-gray-800">
                       {supplier.totalOrders}
                     </div>
                   </div>
                   <div>
-                    <div style={{
-                      fontSize: '11px',
-                      color: '#9ca3af',
-                      marginBottom: '4px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
+                    <div className="text-[11px] text-gray-400 mb-1 uppercase tracking-wider">
                       Total Purchases
                     </div>
-                    <div style={{
-                      fontSize: '20px',
-                      fontWeight: '700',
-                      color: '#10B981'
-                    }}>
+                    <div className="text-xl font-bold text-emerald-500">
                       ${(supplier.totalPurchases / 1000).toFixed(0)}K
                     </div>
                   </div>
                   <div>
-                    <div style={{
-                      fontSize: '11px',
-                      color: '#9ca3af',
-                      marginBottom: '4px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
+                    <div className="text-[11px] text-gray-400 mb-1 uppercase tracking-wider">
                       Payment Terms
                     </div>
-                    <div style={{
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      color: '#6b7280'
-                    }}>
+                    <div className="text-sm font-semibold text-gray-600">
                       {supplier.paymentTerms}
                     </div>
                   </div>
                   <div>
-                    <div style={{
-                      fontSize: '11px',
-                      color: '#9ca3af',
-                      marginBottom: '4px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
+                    <div className="text-[11px] text-gray-400 mb-1 uppercase tracking-wider">
                       Lead Time
                     </div>
-                    <div style={{
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      color: '#6b7280'
-                    }}>
+                    <div className="text-sm font-semibold text-gray-600">
                       {supplier.leadTime} days
                     </div>
                   </div>
@@ -577,16 +312,7 @@ const SuppliersManagement = () => {
 
                 {/* Outstanding Payment Alert */}
                 {supplier.outstandingPayment > 0 && (
-                  <div style={{
-                    padding: '12px 20px',
-                    background: '#FEF3C7',
-                    borderTop: '1px solid #FDE68A',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    fontSize: '13px',
-                    color: '#92400E'
-                  }}>
+                  <div className="px-5 py-3 bg-amber-50 border-t border-amber-200 flex items-center gap-2 text-xs text-amber-900">
                     <AlertCircle size={16} />
                     <span>
                       <strong>${supplier.outstandingPayment.toLocaleString()}</strong> payment pending
@@ -595,53 +321,19 @@ const SuppliersManagement = () => {
                 )}
 
                 {/* Actions */}
-                <div style={{
-                  padding: '16px 20px',
-                  borderTop: '1px solid #f3f4f6',
-                  display: 'flex',
-                  gap: '8px'
-                }}>
-                  <button style={{
-                    flex: 1,
-                    padding: '8px 16px',
-                    background: '#2563eb',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#1d4ed8'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#2563eb'}>
+                <div className="px-5 py-4 border-t border-gray-100 flex gap-2">
+                  <button className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md text-xs font-medium cursor-pointer flex items-center justify-center gap-1.5 transition-all duration-200 hover:bg-blue-700">
                     <ShoppingCart size={14} />
                     Create PO
                   </button>
-                  <button style={iconButtonStyle}
-                    onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'white'}>
-                    <Eye size={16} color="#6b7280" />
+                  <button className="px-2 py-2 bg-white border border-gray-200 rounded-md cursor-pointer flex items-center justify-center transition-all duration-200 hover:bg-gray-50">
+                    <Eye size={16} className="text-gray-600" />
                   </button>
-                  <button style={iconButtonStyle}
-                    onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'white'}>
-                    <Edit2 size={16} color="#6b7280" />
+                  <button className="px-2 py-2 bg-white border border-gray-200 rounded-md cursor-pointer flex items-center justify-center transition-all duration-200 hover:bg-gray-50">
+                    <Edit2 size={16} className="text-gray-600" />
                   </button>
-                  <button style={iconButtonStyle}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.background = '#FEE2E2';
-                      e.currentTarget.querySelector('svg').style.color = '#DC2626';
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.background = 'white';
-                      e.currentTarget.querySelector('svg').style.color = '#6b7280';
-                    }}>
-                    <Trash2 size={16} color="#6b7280" />
+                  <button className="px-2 py-2 bg-white border border-gray-200 rounded-md cursor-pointer flex items-center justify-center transition-all duration-200 hover:bg-red-50 group">
+                    <Trash2 size={16} className="text-gray-600 group-hover:text-red-600" />
                   </button>
                 </div>
               </div>
@@ -651,28 +343,12 @@ const SuppliersManagement = () => {
 
         {/* Empty State */}
         {filteredSuppliers.length === 0 && (
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '60px 20px',
-            textAlign: 'center',
-            border: '1px solid #e5e7eb'
-          }}>
-            <Package size={48} color="#d1d5db" style={{ marginBottom: '16px' }} />
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#6b7280',
-              margin: 0,
-              marginBottom: '8px'
-            }}>
+          <div className="bg-white rounded-xl px-5 py-15 text-center border border-gray-200">
+            <Package size={48} className="text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-600 mb-2">
               No suppliers found
             </h3>
-            <p style={{
-              fontSize: '14px',
-              color: '#9ca3af',
-              margin: 0
-            }}>
+            <p className="text-sm text-gray-400">
               Try adjusting your search or filters
             </p>
           </div>
@@ -680,18 +356,6 @@ const SuppliersManagement = () => {
       </div>
     </div>
   );
-};
-
-const iconButtonStyle = {
-  padding: '8px',
-  background: 'white',
-  border: '1px solid #e5e7eb',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: 'all 0.2s ease'
 };
 
 export default SuppliersManagement;

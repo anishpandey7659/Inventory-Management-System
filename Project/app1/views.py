@@ -43,10 +43,12 @@ class ProductViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset=Category.objects.all()
     serializer_class=CategorySerializer
+    pagination_class = None
 
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset=Supplier.objects.all()
     serializer_class=SupplierSerializer
+    pagination_class = None
 
 
 class StockInViewSet(viewsets.ModelViewSet):

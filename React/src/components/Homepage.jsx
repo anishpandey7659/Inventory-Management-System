@@ -1,22 +1,19 @@
 import React, { useState } from 'react';
-import { Package, Menu, X, TrendingUp, BarChart, Shield, Smartphone, PieChart, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram, Check } from 'lucide-react';
+import { Package, Menu, X, TrendingUp, BarChart, Shield, Smartphone, PieChart, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram, Check, Users, Building2, Crown, Zap, Clock, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from '../Authprovider';
 
-
 export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [Loading,setLoading] =useState("")
-  const [Errors,setErrors] =useState("")
-  const [Success,setSuccess] =useState("")
+  const [Loading, setLoading] = useState("");
+  const [Errors, setErrors] = useState("");
+  const [Success, setSuccess] = useState("");
   const navigate = useNavigate();
-
   const [isLogin, setIsLogin] = useState(true);
   const { setIsLoggedIn } = useContext(AuthContext);
-
 
   const [formData, setFormData] = useState({
     email: '',
@@ -32,14 +29,14 @@ export default function HomePage() {
     });
   };
 
-const handleAuthSubmit = (e) => {
-  e.preventDefault();
-  if (isLogin) {
-    handleLogin(e);
-  } else {
-    handleRegistration(e);
-  }
-};
+  const handleAuthSubmit = (e) => {
+    e.preventDefault();
+    if (isLogin) {
+      handleLogin(e);
+    } else {
+      handleRegistration(e);
+    }
+  };
 
   const openAuthModal = (loginMode = true) => {
     setIsLogin(loginMode);
@@ -53,131 +50,188 @@ const handleAuthSubmit = (e) => {
     });
   };
 
-  const handleContactForm = (e) => {
-    e.preventDefault();
-    alert('Message sent successfully!');
-    e.target.reset();
-  };
-
   const toggleMobileMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Add password confirmation validation before sending
-const handleRegistration = async (e) => {
-  e.preventDefault();
-  // Validate password confirmation (if you have confirmPassword field)
-  if (formData.password !== formData.confirmPassword) {
-    setErrors({ confirmPassword: 'Passwords do not match' });
-    return;
-  }
-  
-  // Validate password strength
-  if (formData.password.length < 8) {
-    setErrors({ password: 'Password must be at least 8 characters' });
-    return;
-  }
-  
-  setLoading(true);
-  setErrors({}); // Clear previous errors before new submission
-  const userData = {
-    email: formData.email,
-    password: formData.password,
-    username:formData.username
+  const handleRegistration = async (e) => {
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      setErrors({ confirmPassword: 'Passwords do not match' });
+      return;
+    }
+    
+    if (formData.password.length < 8) {
+      setErrors({ password: 'Password must be at least 8 characters' });
+      return;
+    }
+    
+    setLoading(true);
+    setErrors({});
+    const userData = {
+      email: formData.email,
+      password: formData.password,
+      username: formData.username
+    };
+    
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/v1/register/', userData);
+      console.log('Registration successful:', response.data);
+      setSuccess(true);
+      navigate('/dashboard');
+      
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
+      
+      setFormData({
+        email: '',
+        password: '',
+        confirmPassword: '',
+        username: ''
+      });
+      
+    } catch (error) {
+      console.error('Registration error:', error);
+      
+      if (error.response?.data) {
+        setErrors(error.response.data);
+      } else if (error.request) {
+        setErrors({ general: 'Cannot reach server. Please try again.' });
+      } else {
+        setErrors({ general: 'An unexpected error occurred.' });
+      }
+      
+      setSuccess(false);
+      
+    } finally {
+      setLoading(false);
+    }
   };
-  console.log(userData)
-  
-  try {
-    const response = await axios.post('http://127.0.0.1:8000/register/', userData);
-    
-    console.log('Registration successful:', response.data);
-    setSuccess(true);
-    navigate('/dashboard')
-    
-    // Store token if returned
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrors({});
+
+    const userData = { username: formData.username, password: formData.password };
+
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/api/v1/token/", userData);
+      localStorage.setItem('accessToken', response.data.access);
+      localStorage.setItem('refreshToken', response.data.refresh);
+      
+      setIsLoggedIn(true);
+      navigate('/dashboard');
+      
+    } catch (error) {
+      setErrors("Invalid Credentials");
+      
+    } finally {
+      setLoading(false);
     }
-    
-    // Clear form
-    setFormData({
-      email: '',
-      password: '',
-      confirmPassword: '',
-      username: ''
-    });
-    
-  } catch (error) {
-    console.error('Registration error:', error);
-    
-    if (error.response?.data) {
-      setErrors(error.response.data);
-    } else if (error.request) {
-      setErrors({ general: 'Cannot reach server. Please try again.' });
-    } else {
-      setErrors({ general: 'An unexpected error occurred.' });
+  };
+
+  const pricingPlans = [
+    {
+      name: "Starter",
+      price: "49",
+      icon: Users,
+      color: "blue",
+      popular: false,
+      description: "Perfect for small teams getting started",
+      features: [
+        "1 Admin Account",
+        "Up to 2 Team Members",
+        "5,000 Product Limit",
+        "Basic Analytics",
+        "Email Support",
+        "Mobile App Access",
+        "Cloud Storage (10GB)"
+      ],
+      organization: {
+        admins: 1,
+        employees: 2
+      }
+    },
+    {
+      name: "Professional",
+      price: "99",
+      icon: Building2,
+      color: "purple",
+      popular: true,
+      description: "Ideal for growing businesses",
+      features: [
+        "2 Admin Accounts",
+        "Up to 10 Team Members",
+        "Unlimited Products",
+        "Advanced Analytics & Reports",
+        "Priority Email & Chat Support",
+        "Mobile App Access",
+        "Cloud Storage (50GB)",
+        "API Access",
+        "Custom Workflows"
+      ],
+      organization: {
+        admins: 2,
+        employees: 10
+      }
+    },
+    {
+      name: "Enterprise",
+      price: "249",
+      icon: Crown,
+      color: "amber",
+      popular: false,
+      description: "For large organizations with advanced needs",
+      features: [
+        "Unlimited Admin Accounts",
+        "Unlimited Team Members",
+        "Unlimited Products",
+        "Custom Analytics & BI Tools",
+        "24/7 Dedicated Support",
+        "Mobile App Access",
+        "Cloud Storage (Unlimited)",
+        "Full API Access",
+        "Custom Integrations",
+        "Advanced Security Features",
+        "Training & Onboarding",
+        "SLA Guarantee"
+      ],
+      organization: {
+        admins: "Unlimited",
+        employees: "Unlimited"
+      }
     }
-    
-    setSuccess(false);
-    
-  } finally {
-    setLoading(false);
-  }
-};
-const handleLogin = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setErrors({}); // Clear previous errors
-  console.log(formData);
-
-  const userData = {username: formData.username,password: formData.password};
-
-  console.log('UserData =>', userData);
-
-  try {
-    const response = await axios.post("http://127.0.0.1:8000/api/v1/token/", userData);
-    console.log(response.data);    
-    localStorage.setItem('accessToken', response.data.access);
-    localStorage.setItem('refreshToken', response.data.refresh);
-    
-    console.log("Login Successful");
-    setIsLoggedIn(true); 
-    navigate('/dashboard');
-
-    
-  } catch (error) {
-    // console.error("Login error:", error);
-    console.log("Error response data:", error.response?.data); 
-    setErrors("Invalid Credentials")
-    
-  } finally {
-    setLoading(false);
-  }
-};
+  ];
 
   return (
     <div className="bg-gray-50">
       {/* Navigation Bar */}
-      <nav className="bg-white shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4">
+      <nav className="bg-white shadow-md sticky top-0 z-50 backdrop-blur-sm bg-white/95">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
-                <Package className="text-blue-600 mr-2" size={28} />
-                <span className="text-xl font-bold text-gray-800">IMS</span>
+              <div className="flex-shrink-0 flex items-center space-x-2">
+                <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-2 rounded-lg">
+                  <Package className="text-white" size={24} />
+                </div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">IMS</span>
               </div>
             </div>
             <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
-                <a href="#home" className="nav-link text-gray-900 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</a>
-                <a href="#about" className="nav-link text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">About</a>
-                <a href="#contact" className="nav-link text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Contact</a>
-                <button onClick={() => openAuthModal(true)} className="text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Login</button>
-                <button onClick={() => openAuthModal(false)} className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">Register</button>
+              <div className="ml-10 flex items-center space-x-1">
+                <a href="#home" className="nav-link text-gray-900 hover:bg-blue-50 hover:text-blue-600 px-4 py-2 rounded-lg text-sm font-medium transition-all">Home</a>
+                <a href="#features" className="nav-link text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-4 py-2 rounded-lg text-sm font-medium transition-all">Features</a>
+                <a href="#pricing" className="nav-link text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-4 py-2 rounded-lg text-sm font-medium transition-all">Pricing</a>
+                <a href="#about" className="nav-link text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-4 py-2 rounded-lg text-sm font-medium transition-all">About</a>
+                <a href="#contact" className="nav-link text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-4 py-2 rounded-lg text-sm font-medium transition-all">Contact</a>
+                <button onClick={() => openAuthModal(true)} className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium transition-all ml-2">Login</button>
+                <button onClick={() => openAuthModal(false)} className="bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 px-5 py-2 rounded-lg text-sm font-medium transition-all shadow-md hover:shadow-lg">Get Started</button>
               </div>
             </div>
             <div className="md:hidden">
-              <button onClick={toggleMobileMenu} className="text-gray-600 hover:text-gray-900 focus:outline-none">
+              <button onClick={toggleMobileMenu} className="text-gray-600 hover:text-gray-900 focus:outline-none p-2">
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
@@ -185,160 +239,400 @@ const handleLogin = async (e) => {
         </div>
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-white border-t">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              <a href="#home" className="block text-gray-900 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium">Home</a>
-              <a href="#about" className="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium">About</a>
-              <a href="#contact" className="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium">Contact</a>
-              <button onClick={() => openAuthModal(true)} className="block w-full text-left text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium">Login</button>
-              <button onClick={() => openAuthModal(false)} className="block w-full text-left bg-blue-600 text-white hover:bg-blue-700 px-3 py-2 rounded-md text-base font-medium">Register</button>
+          <div className="md:hidden bg-white border-t shadow-lg">
+            <div className="px-4 pt-2 pb-4 space-y-1">
+              <a href="#home" className="block text-gray-900 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-lg text-base font-medium transition-all">Home</a>
+              <a href="#features" className="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-lg text-base font-medium transition-all">Features</a>
+              <a href="#pricing" className="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-lg text-base font-medium transition-all">Pricing</a>
+              <a href="#about" className="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-lg text-base font-medium transition-all">About</a>
+              <a href="#contact" className="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-lg text-base font-medium transition-all">Contact</a>
+              <button onClick={() => openAuthModal(true)} className="block w-full text-left text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-lg text-base font-medium transition-all">Login</button>
+              <button onClick={() => openAuthModal(false)} className="block w-full text-left bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2 rounded-lg text-base font-medium transition-all shadow-md">Get Started</button>
             </div>
           </div>
         )}
       </nav>
 
       {/* Hero Section */}
-      <section id="home" className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-20 md:py-32">
+      <section id="home" className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 to-transparent"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">Inventory Management System</h1>
-            <p className="text-xl md:text-2xl mb-8 text-blue-100">Streamline your inventory operations with our cutting-edge management solution</p>
+            <div className="inline-flex items-center bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 rounded-full px-4 py-2 mb-8">
+              <Zap className="text-yellow-300 mr-2" size={16} />
+              <span className="text-sm font-medium">Trusted by 10,000+ businesses worldwide</span>
+            </div>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+              Inventory Management
+              <span className="block bg-gradient-to-r from-blue-200 to-white bg-clip-text text-transparent">Made Simple</span>
+            </h1>
+            <p className="text-xl md:text-2xl mb-10 text-blue-100 max-w-3xl mx-auto leading-relaxed">
+              Streamline your inventory operations with our cutting-edge management solution. Real-time tracking, powerful analytics, and seamless collaboration.
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button onClick={() => openAuthModal(false)} className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors">
+              <button onClick={() => openAuthModal(false)} className="group bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-xl font-semibold transition-all shadow-xl hover:shadow-2xl hover:scale-105 flex items-center justify-center">
                 Get Started Free
+                <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
               </button>
-              <button onClick={() => document.getElementById('about').scrollIntoView({ behavior: 'smooth' })} className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold transition-colors">
-                Learn More
+              <button onClick={() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })} className="border-2 border-white/50 backdrop-blur-sm bg-white/10 text-white hover:bg-white hover:text-blue-600 px-8 py-4 rounded-xl font-semibold transition-all hover:scale-105">
+                View Pricing
               </button>
+            </div>
+            <div className="mt-12 flex flex-wrap justify-center gap-8 text-sm text-blue-200">
+              <div className="flex items-center">
+                <Check className="mr-2 text-green-300" size={18} />
+                No credit card required
+              </div>
+              <div className="flex items-center">
+                <Check className="mr-2 text-green-300" size={18} />
+                14-day free trial
+              </div>
+              <div className="flex items-center">
+                <Check className="mr-2 text-green-300" size={18} />
+                Cancel anytime
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Key Features</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="flex justify-center mb-4">
-                <TrendingUp className="text-blue-600" size={48} />
+      <section id="features" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Powerful Features for Your Business</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Everything you need to manage your inventory efficiently and scale your operations</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="group p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-white border border-blue-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+              <div className="flex justify-center mb-6">
+                <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
+                  <TrendingUp className="text-white" size={32} />
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Real-time Tracking</h3>
-              <p className="text-gray-600">Monitor your inventory levels in real-time with advanced analytics and reporting</p>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Real-time Tracking</h3>
+              <p className="text-gray-600 leading-relaxed">Monitor your inventory levels in real-time with advanced analytics, automated alerts, and comprehensive reporting tools</p>
             </div>
-            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="flex justify-center mb-4">
-                <Shield className="text-blue-600" size={48} />
+            
+            <div className="group p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-white border border-purple-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+              <div className="flex justify-center mb-6">
+                <div className="p-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
+                  <Users className="text-white" size={32} />
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Secure & Reliable</h3>
-              <p className="text-gray-600">Enterprise-grade security ensures your data is always protected and accessible</p>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Team Collaboration</h3>
+              <p className="text-gray-600 leading-relaxed">Organize your team with role-based access, seamless communication, and collaborative workflows for maximum efficiency</p>
             </div>
-            <div className="text-center p-6 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="flex justify-center mb-4">
-                <Smartphone className="text-blue-600" size={48} />
+            
+            <div className="group p-8 rounded-2xl bg-gradient-to-br from-green-50 to-white border border-green-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+              <div className="flex justify-center mb-6">
+                <div className="p-4 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
+                  <Shield className="text-white" size={32} />
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Mobile Access</h3>
-              <p className="text-gray-600">Manage your inventory on the go with our responsive mobile interface</p>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Secure & Reliable</h3>
+              <p className="text-gray-600 leading-relaxed">Enterprise-grade security with data encryption, regular backups, and 99.9% uptime guarantee to keep your data safe</p>
+            </div>
+            
+            <div className="group p-8 rounded-2xl bg-gradient-to-br from-amber-50 to-white border border-amber-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+              <div className="flex justify-center mb-6">
+                <div className="p-4 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
+                  <Smartphone className="text-white" size={32} />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Mobile Access</h3>
+              <p className="text-gray-600 leading-relaxed">Manage your inventory on the go with our responsive mobile interface and dedicated iOS & Android apps</p>
+            </div>
+            
+            <div className="group p-8 rounded-2xl bg-gradient-to-br from-rose-50 to-white border border-rose-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+              <div className="flex justify-center mb-6">
+                <div className="p-4 bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
+                  <BarChart className="text-white" size={32} />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Advanced Analytics</h3>
+              <p className="text-gray-600 leading-relaxed">Make data-driven decisions with powerful analytics, custom reports, and predictive insights for inventory optimization</p>
+            </div>
+            
+            <div className="group p-8 rounded-2xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+              <div className="flex justify-center mb-6">
+                <div className="p-4 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl shadow-lg group-hover:shadow-xl transition-shadow">
+                  <Zap className="text-white" size={32} />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Automation</h3>
+              <p className="text-gray-600 leading-relaxed">Automate repetitive tasks, set up smart alerts, and create custom workflows to save time and reduce errors</p>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section id="pricing" className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Choose Your Plan</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Flexible pricing options to match your organization's size and needs</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {pricingPlans.map((plan, index) => {
+              const IconComponent = plan.icon;
+              const colorClasses = {
+                blue: { 
+                  border: 'border-blue-200', 
+                  bg: 'from-blue-50 to-white',
+                  icon: 'from-blue-500 to-blue-600',
+                  button: 'bg-blue-600 hover:bg-blue-700',
+                  badge: 'bg-blue-100 text-blue-700'
+                },
+                purple: { 
+                  border: 'border-purple-300', 
+                  bg: 'from-purple-50 to-white',
+                  icon: 'from-purple-500 to-purple-600',
+                  button: 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700',
+                  badge: 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                },
+                amber: { 
+                  border: 'border-amber-200', 
+                  bg: 'from-amber-50 to-white',
+                  icon: 'from-amber-500 to-amber-600',
+                  button: 'bg-amber-600 hover:bg-amber-700',
+                  badge: 'bg-amber-100 text-amber-700'
+                }
+              };
+              const colors = colorClasses[plan.color];
+              
+              return (
+                <div key={index} className={`relative p-8 rounded-2xl bg-gradient-to-br ${colors.bg} border-2 ${colors.border} ${plan.popular ? 'shadow-2xl scale-105 md:scale-110 z-10' : 'shadow-lg hover:shadow-xl'} transition-all duration-300`}>
+                  {plan.popular && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <span className={`inline-block ${colors.badge} px-4 py-1 rounded-full text-sm font-semibold shadow-lg`}>
+                        Most Popular
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="text-center mb-6">
+                    <div className="flex justify-center mb-4">
+                      <div className={`p-4 bg-gradient-to-br ${colors.icon} rounded-2xl shadow-lg`}>
+                        <IconComponent className="text-white" size={32} />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
+                    <div className="flex items-baseline justify-center">
+                      <span className="text-5xl font-bold text-gray-900">${plan.price}</span>
+                      <span className="text-gray-600 ml-2">/month</span>
+                    </div>
+                  </div>
+
+                  <div className="mb-6 p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-gray-200">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700 font-medium">Organization Size:</span>
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600 text-sm flex items-center">
+                          <Crown size={16} className="mr-2 text-amber-500" />
+                          Admins
+                        </span>
+                        <span className="font-semibold text-gray-900">{plan.organization.admins}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600 text-sm flex items-center">
+                          <Users size={16} className="mr-2 text-blue-500" />
+                          Team Members
+                        </span>
+                        <span className="font-semibold text-gray-900">{plan.organization.employees}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-start">
+                        <Check className="text-green-500 mr-3 flex-shrink-0 mt-0.5" size={18} />
+                        <span className="text-gray-700 text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button 
+                    onClick={() => openAuthModal(false)}
+                    className={`w-full ${colors.button} text-white py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg hover:scale-105`}
+                  >
+                    Get Started
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-gray-600">All plans include 14-day free trial • No credit card required</p>
+          </div>
+        </div>
+      </section>
+
       {/* About Section */}
-      <section id="about" className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
+      <section id="about" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-6">About IMS</h2>
-              <p className="text-gray-600 mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">About IMS</h2>
+              <p className="text-gray-600 mb-4 leading-relaxed text-lg">
                 IMS is a comprehensive inventory management solution designed to help businesses of all sizes optimize their stock control processes. Our platform combines powerful features with an intuitive interface to deliver exceptional user experience.
               </p>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 mb-6 leading-relaxed text-lg">
                 With over 10 years of industry experience, we've helped thousands of businesses reduce costs, improve efficiency, and scale their operations seamlessly.
               </p>
-              <ul className="space-y-2 text-gray-600">
-                <li className="flex items-center"><Check className="text-green-500 mr-2" size={20} /> Cloud-based solution for remote access</li>
-                <li className="flex items-center"><Check className="text-green-500 mr-2" size={20} /> Automated inventory tracking</li>
-                <li className="flex items-center"><Check className="text-green-500 mr-2" size={20} /> Advanced reporting and analytics</li>
-                <li className="flex items-center"><Check className="text-green-500 mr-2" size={20} /> 24/7 customer support</li>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center text-gray-700">
+                  <div className="p-1 bg-green-100 rounded-full mr-3">
+                    <Check className="text-green-600" size={18} />
+                  </div>
+                  <span className="text-lg">Cloud-based solution for remote access</span>
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <div className="p-1 bg-green-100 rounded-full mr-3">
+                    <Check className="text-green-600" size={18} />
+                  </div>
+                  <span className="text-lg">Automated inventory tracking</span>
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <div className="p-1 bg-green-100 rounded-full mr-3">
+                    <Check className="text-green-600" size={18} />
+                  </div>
+                  <span className="text-lg">Advanced reporting and analytics</span>
+                </li>
+                <li className="flex items-center text-gray-700">
+                  <div className="p-1 bg-green-100 rounded-full mr-3">
+                    <Check className="text-green-600" size={18} />
+                  </div>
+                  <span className="text-lg">24/7 customer support</span>
+                </li>
               </ul>
+              <button onClick={() => openAuthModal(false)} className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl hover:scale-105">
+                Start Your Free Trial
+              </button>
             </div>
-            <div className="bg-blue-100 rounded-lg p-8 text-center">
-              <div className="flex justify-center mb-4">
-                <PieChart className="text-blue-600" size={64} />
+            <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-12 text-center shadow-xl">
+              <div className="flex justify-center mb-6">
+                <div className="p-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl shadow-2xl">
+                  <PieChart className="text-white" size={64} />
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">Trusted by 10,000+ Businesses</h3>
-              <p className="text-gray-600">Join the companies that have transformed their inventory management</p>
+              <h3 className="text-3xl font-bold text-gray-900 mb-3">10,000+</h3>
+              <p className="text-xl text-gray-700 mb-6">Businesses Trust IMS</p>
+              <div className="grid grid-cols-2 gap-4 mt-8">
+                <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl">
+                  <p className="text-2xl font-bold text-blue-600">99.9%</p>
+                  <p className="text-sm text-gray-600">Uptime</p>
+                </div>
+                <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl">
+                  <p className="text-2xl font-bold text-purple-600">24/7</p>
+                  <p className="text-sm text-gray-600">Support</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Get in Touch</h2>
+      <section id="contact" className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Get in Touch</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+          </div>
           <div className="grid md:grid-cols-2 gap-12">
-            <div>
+            <div className="bg-white p-8 rounded-2xl shadow-lg">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Name</label>
-                  <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Your Name" />
+                  <label className="block text-gray-700 font-semibold mb-2">Name</label>
+                  <input type="text" className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Your Name" />
                 </div>
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Email</label>
-                  <input type="email" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="your@email.com" />
+                  <label className="block text-gray-700 font-semibold mb-2">Email</label>
+                  <input type="email" className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="your@email.com" />
                 </div>
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Message</label>
-                  <textarea rows="4" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Your message..."></textarea>
+                  <label className="block text-gray-700 font-semibold mb-2">Message</label>
+                  <textarea rows="5" className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none" placeholder="Your message..."></textarea>
                 </div>
-                <button onClick={() => alert('Message sent successfully!')} className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                <button onClick={() => alert('Message sent successfully!')} className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-semibold shadow-lg hover:shadow-xl hover:scale-105">
                   Send Message
                 </button>
               </div>
             </div>
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Contact Information</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <Mail className="text-blue-600" size={20} />
-                    <span className="ml-3 text-gray-600">info@ims.com</span>
+            <div className="space-y-8">
+              <div className="bg-white p-8 rounded-2xl shadow-lg">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">Contact Information</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center group">
+                    <div className="p-3 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors">
+                      <Mail className="text-blue-600" size={20} />
+                    </div>
+                    <span className="ml-4 text-gray-700">info@ims.com</span>
                   </div>
-                  <div className="flex items-center">
-                    <Phone className="text-blue-600" size={20} />
-                    <span className="ml-3 text-gray-600">+1 (555) 123-4567</span>
+                  <div className="flex items-center group">
+                    <div className="p-3 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors">
+                      <Phone className="text-blue-600" size={20} />
+                    </div>
+                    <span className="ml-4 text-gray-700">+1 (555) 123-4567</span>
                   </div>
-                  <div className="flex items-center">
-                    <MapPin className="text-blue-600" size={20} />
-                    <span className="ml-3 text-gray-600">123 Business Ave, Suite 100, City, State 12345</span>
+                  <div className="flex items-start group">
+                    <div className="p-3 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors">
+                      <MapPin className="text-blue-600" size={20} />
+                    </div>
+                    <span className="ml-4 text-gray-700">123 Business Ave, Suite 100, City, State 12345</span>
                   </div>
                 </div>
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Business Hours</h3>
-                <div className="space-y-2 text-gray-600">
-                  <p>Monday - Friday: 9:00 AM - 6:00 PM</p>
-                  <p>Saturday: 10:00 AM - 4:00 PM</p>
-                  <p>Sunday: Closed</p>
+              <div className="bg-white p-8 rounded-2xl shadow-lg">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">Business Hours</h3>
+                <div className="space-y-3 text-gray-700">
+                  <div className="flex items-center">
+                    <Clock className="text-blue-600 mr-3" size={20} />
+                    <div>
+                      <p className="font-medium">Monday - Friday</p>
+                      <p className="text-sm text-gray-600">9:00 AM - 6:00 PM</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <Clock className="text-blue-600 mr-3" size={20} />
+                    <div>
+                      <p className="font-medium">Saturday</p>
+                      <p className="text-sm text-gray-600">10:00 AM - 4:00 PM</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <Clock className="text-blue-600 mr-3" size={20} />
+                    <div>
+                      <p className="font-medium">Sunday</p>
+                      <p className="text-sm text-gray-600">Closed</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Follow Us</h3>
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-8 rounded-2xl shadow-lg text-white">
+                <h3 className="text-xl font-bold mb-4">Follow Us</h3>
+                <p className="mb-6 text-blue-100">Stay connected for updates and news</p>
                 <div className="flex space-x-4">
-                  <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">
-                    <Facebook size={28} />
+                  <a href="#" className="p-3 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition-all hover:scale-110">
+                    <Facebook size={24} />
                   </a>
-                  <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">
-                    <Twitter size={28} />
+                  <a href="#" className="p-3 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition-all hover:scale-110">
+                    <Twitter size={24} />
                   </a>
-                  <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">
-                    <Linkedin size={28} />
+                  <a href="#" className="p-3 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition-all hover:scale-110">
+                    <Linkedin size={24} />
                   </a>
-                  <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">
-                    <Instagram size={28} />
+                  <a href="#" className="p-3 bg-white/20 backdrop-blur-sm rounded-xl hover:bg-white/30 transition-all hover:scale-110">
+                    <Instagram size={24} />
                   </a>
                 </div>
               </div>
@@ -348,102 +642,112 @@ const handleLogin = async (e) => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4">
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <p>&copy; 2024 IMS - Inventory Management System. All rights reserved.</p>
+            <div className="flex items-center justify-center mb-4">
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-lg">
+                <Package className="text-white" size={24} />
+              </div>
+              <span className="text-2xl font-bold ml-3">IMS</span>
+            </div>
+            <p className="text-gray-400 mb-4">Inventory Management System</p>
+            <p className="text-gray-500">&copy; 2024 IMS. All rights reserved.</p>
           </div>
         </div>
       </footer>
 
       {/* Auth Modal */}
       {showAuthModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 w-full max-w-md">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">{isLogin ? 'Login' : 'Register'}</h2>
-              <button onClick={() => setShowAuthModal(false)} className="text-gray-500 hover:text-gray-700">
+              <h2 className="text-2xl font-bold text-gray-900">{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
+              <button onClick={() => setShowAuthModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg">
                 <X size={24} />
               </button>
             </div>
             {Errors && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
-              {Errors.data}
-            </div>
-          )}
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+                {typeof Errors === 'string' ? Errors : (Errors.data || Errors.general || 'An error occurred')}
+              </div>
+            )}
             <div className="space-y-4">
               {!isLogin && (
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                  placeholder="Enter your email"
-                />
-              </div>
-              )}
-              <div>
-                  <label className="block text-gray-700 font-medium mb-2">Username</label>
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-2">Email</label>
                   <input
-                    type="text"
-                    name="username"
-                    value={formData.username}
+                    type="email"
+                    name="email"
+                    value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                    placeholder="Enter your Username"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="Enter your email"
                   />
                 </div>
-              
+              )}
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Password</label>
+                <label className="block text-gray-700 font-semibold mb-2">Username</label>
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Enter your username"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">Password</label>
                 <input
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder={isLogin ? "Enter your password" : "Create a password"}
                 />
               </div>
               {!isLogin && (
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Confirm Password</label>
+                  <label className="block text-gray-700 font-semibold mb-2">Confirm Password</label>
                   <input
                     type="password"
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="Confirm your password"
                   />
                 </div>
               )}
               {isLogin && (
                 <div className="flex items-center justify-between">
-                  <label className="flex items-center">
-                    <input type="checkbox" className="mr-2" />
+                  <label className="flex items-center cursor-pointer">
+                    <input type="checkbox" className="mr-2 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
                     <span className="text-gray-600 text-sm">Remember me</span>
                   </label>
-                  <a href="#" className="text-blue-600 text-sm hover:underline">Forgot password?</a>
+                  <a href="#" className="text-blue-600 text-sm hover:underline font-medium">Forgot password?</a>
                 </div>
               )}
               {!isLogin && (
-                <div className="flex items-center">
-                  <input type="checkbox" className="mr-2" />
-                  <span className="text-gray-600 text-sm">I agree to the Terms and Conditions</span>
+                <div className="flex items-start">
+                  <input type="checkbox" className="mr-3 mt-1 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
+                  <span className="text-gray-600 text-sm">I agree to the <a href="#" className="text-blue-600 hover:underline">Terms and Conditions</a> and <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a></span>
                 </div>
               )}
-              <button onClick={handleAuthSubmit} className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                {isLogin ? 'Login' : 'Register'}
+              <button 
+                onClick={handleAuthSubmit} 
+                disabled={Loading}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {Loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
               </button>
             </div>
-            <p className="text-center mt-4 text-gray-600">
+            <p className="text-center mt-6 text-gray-600">
               {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <button onClick={() => setIsLogin(!isLogin)} className="text-blue-600 hover:underline">
-                {isLogin ? 'Register' : 'Login'}
+              <button onClick={() => setIsLogin(!isLogin)} className="text-blue-600 hover:underline font-semibold">
+                {isLogin ? 'Sign Up' : 'Sign In'}
               </button>
             </p>
           </div>

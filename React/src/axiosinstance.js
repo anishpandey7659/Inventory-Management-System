@@ -30,18 +30,27 @@ axiosInstance.interceptors.response.use(
     },
     async function(error){
         const originalRequest = error.config;
+        console.log('❌ API Error:', error.response?.status, originalRequest.url);
         
         if(error.response?.status === 401 && !originalRequest._retry){
+            console.log('🔄 Attempting to refresh token...');
             originalRequest._retry = true;
             const refreshToken = localStorage.getItem('refreshToken');
-            
+
+            if (!refreshToken) {
+                console.log('⚠️ No refresh token found in localStorage');
+                localStorage.clear();
+                window.location.href = '/';
+                return Promise.reject(error);
+            }
             try{
                 const response = await axios.post(`${baseURL}/token/refresh/`, {
                     refresh: refreshToken
                 });
-                
                 localStorage.setItem('accessToken', response.data.access); 
+                
                 // console.log("New Token Refreshed =>", response.data.access);
+                console.log("✅ Token refreshed successfully!");  // Add this line
                 
                 originalRequest.headers['Authorization'] = `Bearer ${response.data.access}`;
                 return axiosInstance(originalRequest);
