@@ -6,9 +6,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .filters import ProductFilter,StockInFilter
 from rest_framework.filters import SearchFilter
 from django.db.models import Sum, F,Case, When, Value, CharField
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-
+from .permissions import *
 
 # Create your views here.
 def first_view(request):
@@ -21,6 +21,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend,SearchFilter]
     filterset_class = ProductFilter
     search_fields = ['product_name']
+    permission_classes = [CanManageProducts]
     
     def get_queryset(self):
         status = self.request.query_params.get("status")
@@ -44,11 +45,13 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset=Category.objects.all()
     serializer_class=CategorySerializer
     pagination_class = None
+    permission_classes = [CanManageCategories] 
 
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset=Supplier.objects.all()
     serializer_class=SupplierSerializer
     pagination_class = None
+    permission_classes = [CanManageSuppliers]
 
 
 class StockInViewSet(viewsets.ModelViewSet):
@@ -57,17 +60,20 @@ class StockInViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend,SearchFilter]
     filterset_class = StockInFilter
     search_fields = ['product__product_name','supplier__name']
+    permission_classes = [CanManageStockIn]
 
 class SaleViewSet(viewsets.ModelViewSet):
     queryset = Sale.objects.all() \
         .prefetch_related("items") \
         .order_by("-date")
     serializer_class = SaleSerializer
+    permission_classes = [CanManageSales]
 
 
 
 
 @api_view(['GET'])
+@permission_classes([CanViewReports]) 
 def total_revenue(request):
     revenue = Sale.objects.aggregate(
         total_revenue=Sum('total_amount')
@@ -75,37 +81,13 @@ def total_revenue(request):
 
     return Response({"total_revenue": revenue})
 
-
-
-### Auth
-from .serializers import Userserializer
-from rest_framework import generics
-from django.contrib.auth.models import User
-from rest_framework.permissions import AllowAny,IsAuthenticated
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-
-# Create your views here.
-class Registerview(generics.CreateAPIView):
-    queryset=User.objects.all()
-    serializer_class =Userserializer
-    permission_classes=[AllowAny] 
- 
-class ProtectedView(APIView):
-    permission_classes =[IsAuthenticated]
-
-    def get(self,request):
-        response ={
-            'status':'Request was permitted'
-        }
-        return Response(response)
         
 
 from collections import defaultdict
 from rest_framework.response import Response
 
 @api_view(['GET'])
+@permission_classes([CanViewReports]) 
 def products_grouped_by_category(request):
     queryset = Product.objects.select_related('category')
 

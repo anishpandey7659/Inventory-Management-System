@@ -110,12 +110,8 @@ const AddProductModal = ({ isOpen, onClose, head, mode = "add", product = null }
     } catch (err) {
       const errors = err.response?.data;
       let errorText = "Something went wrong.";
-      if (errors) {
-        errorText = Object.entries(errors)
-          .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
-          .join(" | ");
-      }
-      setErrorMsg(errorText);
+      console.log(err.response.data)
+      setErrorMsg(err.response.data);
     }
   };
 

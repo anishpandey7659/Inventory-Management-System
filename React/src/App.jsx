@@ -11,6 +11,8 @@ import HomePage from "./components/Homepage";
 import Authprovider from "./Authprovider";
 import Privateroute from "./components/Privateroute";
 import SuppliersManagement from "./components/Suppliers management";
+import CompanyAccountForm from "./components/Subpage/CompanyAccountForm";
+import UserManagement from "./components/UserManagement";
 
 function App() {
   return (
@@ -20,7 +22,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/"element={<HomePage/>}/>
-
+              <Route path="/company-form"element={<CompanyAccountForm/>}/>
             <Route element={
               <Privateroute>
                 <Layout />
@@ -33,6 +35,7 @@ function App() {
               <Route path="/report" element={<Reports />} />
               <Route path="/billinghistory" element={<BillingHistory />} />
               <Route path="/suppliers" element={<SuppliersManagement />} />
+              <Route path="/user-management" element={<UserManagement />} />
             </Route>
           
 

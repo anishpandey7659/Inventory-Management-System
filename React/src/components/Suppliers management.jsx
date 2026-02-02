@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Search, Plus, Phone, Mail, MapPin, Package, DollarSign, TrendingUp, Clock, Star, Edit2, Trash2, Eye, ShoppingCart, Calendar, FileText, Award, AlertCircle } from 'lucide-react';
+import { CreateSupplierModal } from './Subpage/CreateSupplier';
+import { getSuppliers } from '../Apiservice';
 
 const SuppliersManagement = () => {
+  const [showCreateSupplier, setShowCreateSupplier] = useState(false);
   const [suppliers, setSuppliers] = useState([
     {
       id: 1,
@@ -100,6 +103,20 @@ const SuppliersManagement = () => {
     }
   ]);
 
+  useEffect(()=>{
+    const fetchSupplier =async()=>{
+      try{
+        const response =await getSuppliers();
+        console.log(response.data)
+      }catch(err){
+        console.log(err.data);
+      }
+    }
+    fetchSupplier();
+
+  },[]
+  )
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedSupplier, setSelectedSupplier] = useState(null);
@@ -137,6 +154,9 @@ const SuppliersManagement = () => {
     { label: 'Average Rating', value: avgRating, icon: Star, color: 'text-amber-500', bgColor: 'bg-amber-500', subtext: 'Out of 5.0' },
     { label: 'Outstanding Payments', value: `$${(totalOutstanding / 1000).toFixed(1)}K`, icon: AlertCircle, color: 'text-red-500', bgColor: 'bg-red-500', subtext: 'Pending' }
   ];
+  const handleCreateSupplier =(e)=>{
+    setShowCreateSupplier(true);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -152,12 +172,16 @@ const SuppliersManagement = () => {
             </p>
           </div>
           <button 
-            onClick={() => setShowAddModal(true)}
+            onClick={handleCreateSupplier}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium cursor-pointer flex items-center gap-2 transition-all duration-200 shadow-md shadow-blue-600/30 hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-600/40"
           >
             <Plus size={18} />
             Add Supplier
           </button>
+              <CreateSupplierModal
+                isOpen={showCreateSupplier}
+                onClose={() => setShowCreateSupplier(false)}
+              />
         </div>
       </div>
 

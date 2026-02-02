@@ -158,19 +158,3 @@ class SaleItem(models.Model):
             super().delete(*args, **kwargs)
 
         self.sale.update_totals()
-
-class UserProfile(models.Model):
-    ADMIN='admin'
-    EMPLOYEE='employee'
-
-    ROLE_CHOICE =[
-        (ADMIN,'Admin'),
-        (EMPLOYEE,'Employee'),
-        ]
-    
-    user =models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
-    role =models.CharField(max_length=50,choices=ROLE_CHOICE,default=EMPLOYEE)
-    phone=models.CharField(max_length=15,blank=True,null=True)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.role}"

@@ -2,7 +2,7 @@ import React, { useState,useEffect } from 'react';
 import { Search, Eye, Download, Printer, Plus, FileText, DollarSign, CheckCircle, Clock } from 'lucide-react';
 import { Link } from "react-router-dom";
 import { useFetch } from "../UseHook";
-import { getsales,total_revenue,getProduct } from '../Apiservice';
+import { getsales,total_revenue,getProduct,getsalesId } from '../Apiservice';
 
 const BillingHistory = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,23 +39,26 @@ const fetchInvoiceDetail = async (invoice) => {
     const numericId = invoice.id.replace('INV-', '');
     const url = `http://127.0.0.1:8000/api/v1/sales/${numericId}/`;
     
-    console.log('Fetching URL:', url);
     console.log('Invoice object:', invoice);
+    console.log('numericId :', numericId );
     
-    const response = await fetch(url);
+    // const response = await fetch(url);
+    const response = await getsalesId(numericId);
+
     
     console.log('Response status:', response.status);
+    console.log('Response data:', response.data);
     
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.log('Error response:', errorData);
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    // if (!response.ok) {
+    //   const errorData = await response.json();
+    //   console.log('Error response:', errorData);
+    //   throw new Error(`HTTP error! status: ${response.status}`);
+    // }
     
-    const data = await response.json();
+    // const data = await response.json();
   
     // console.log('Fetched data:', data);
-    setSelectedInvoiceDetail(data);
+    setSelectedInvoiceDetail(response.data);
   
   } catch (error) {
     console.error('Error fetching invoice details:', error);

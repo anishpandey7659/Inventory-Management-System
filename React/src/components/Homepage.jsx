@@ -4,122 +4,54 @@ import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from '../Authprovider';
+import { Link } from 'react-router-dom';
+import { login } from '../Apiservice';
 
 export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [Loading, setLoading] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [Loading, setLoading] = useState(false);
   const [Errors, setErrors] = useState("");
-  const [Success, setSuccess] = useState("");
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
   const { setIsLoggedIn } = useContext(AuthContext);
 
-  const [formData, setFormData] = useState({
+  const [loginData, setLoginData] = useState({
     email: '',
-    password: '',
-    confirmPassword: '',
-    username: ''
+    password: ''
   });
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
+    setLoginData({
+      ...loginData,
       [e.target.name]: e.target.value
     });
   };
 
-  const handleAuthSubmit = (e) => {
-    e.preventDefault();
-    if (isLogin) {
-      handleLogin(e);
-    } else {
-      handleRegistration(e);
-    }
-  };
-
-  const openAuthModal = (loginMode = true) => {
-    setIsLogin(loginMode);
-    setShowAuthModal(true);
+  const openLoginModal = () => {
+    setShowLoginModal(true);
     setIsMenuOpen(false);
-    setFormData({
-      email: '',
-      password: '',
-      confirmPassword: '',
-      username: ''
+    setLoginData({
+      username: '',
+      password: ''
     });
+    setErrors("");
   };
 
   const toggleMobileMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleRegistration = async (e) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      setErrors({ confirmPassword: 'Passwords do not match' });
-      return;
-    }
-    
-    if (formData.password.length < 8) {
-      setErrors({ password: 'Password must be at least 8 characters' });
-      return;
-    }
-    
-    setLoading(true);
-    setErrors({});
-    const userData = {
-      email: formData.email,
-      password: formData.password,
-      username: formData.username
-    };
-    
-    try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/register/', userData);
-      console.log('Registration successful:', response.data);
-      setSuccess(true);
-      navigate('/dashboard');
-      
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-      }
-      
-      setFormData({
-        email: '',
-        password: '',
-        confirmPassword: '',
-        username: ''
-      });
-      
-    } catch (error) {
-      console.error('Registration error:', error);
-      
-      if (error.response?.data) {
-        setErrors(error.response.data);
-      } else if (error.request) {
-        setErrors({ general: 'Cannot reach server. Please try again.' });
-      } else {
-        setErrors({ general: 'An unexpected error occurred.' });
-      }
-      
-      setSuccess(false);
-      
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setErrors({});
+    setErrors("");
 
-    const userData = { username: formData.username, password: formData.password };
+    const userData = { email: loginData.email, password: loginData.password };
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/v1/token/", userData);
-      localStorage.setItem('accessToken', response.data.access);
-      localStorage.setItem('refreshToken', response.data.refresh);
+      const response = await login(userData);
+      localStorage.setItem('accessToken', response.data.tokens.access);
+      localStorage.setItem('refreshToken',response.data.tokens.refresh);
       
       setIsLoggedIn(true);
       navigate('/dashboard');
@@ -226,8 +158,8 @@ export default function HomePage() {
                 <a href="#pricing" className="nav-link text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-4 py-2 rounded-lg text-sm font-medium transition-all">Pricing</a>
                 <a href="#about" className="nav-link text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-4 py-2 rounded-lg text-sm font-medium transition-all">About</a>
                 <a href="#contact" className="nav-link text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-4 py-2 rounded-lg text-sm font-medium transition-all">Contact</a>
-                <button onClick={() => openAuthModal(true)} className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium transition-all ml-2">Login</button>
-                <button onClick={() => openAuthModal(false)} className="bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 px-5 py-2 rounded-lg text-sm font-medium transition-all shadow-md hover:shadow-lg">Get Started</button>
+                <button onClick={openLoginModal} className="text-gray-600 hover:bg-gray-50 hover:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium transition-all ml-2">Login</button>
+                <Link to="/company-form" className="bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 px-5 py-2 rounded-lg text-sm font-medium transition-all shadow-md hover:shadow-lg">Get Started</Link>
               </div>
             </div>
             <div className="md:hidden">
@@ -246,8 +178,8 @@ export default function HomePage() {
               <a href="#pricing" className="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-lg text-base font-medium transition-all">Pricing</a>
               <a href="#about" className="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-lg text-base font-medium transition-all">About</a>
               <a href="#contact" className="block text-gray-600 hover:bg-blue-50 hover:text-blue-600 px-3 py-2 rounded-lg text-base font-medium transition-all">Contact</a>
-              <button onClick={() => openAuthModal(true)} className="block w-full text-left text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-lg text-base font-medium transition-all">Login</button>
-              <button onClick={() => openAuthModal(false)} className="block w-full text-left bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2 rounded-lg text-base font-medium transition-all shadow-md">Get Started</button>
+              <button onClick={openLoginModal} className="block w-full text-left text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-lg text-base font-medium transition-all">Login</button>
+              <Link to="/company-form" className="block w-full text-left bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-2 rounded-lg text-base font-medium transition-all shadow-md">Get Started</Link>
             </div>
           </div>
         )}
@@ -271,10 +203,10 @@ export default function HomePage() {
               Streamline your inventory operations with our cutting-edge management solution. Real-time tracking, powerful analytics, and seamless collaboration.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button onClick={() => openAuthModal(false)} className="group bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-xl font-semibold transition-all shadow-xl hover:shadow-2xl hover:scale-105 flex items-center justify-center">
+              <Link to="/company-form" className="group bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-xl font-semibold transition-all shadow-xl hover:shadow-2xl hover:scale-105 flex items-center justify-center">
                 Get Started Free
                 <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
-              </button>
+              </Link>
               <button onClick={() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })} className="border-2 border-white/50 backdrop-blur-sm bg-white/10 text-white hover:bg-white hover:text-blue-600 px-8 py-4 rounded-xl font-semibold transition-all hover:scale-105">
                 View Pricing
               </button>
@@ -459,12 +391,12 @@ export default function HomePage() {
                     ))}
                   </ul>
 
-                  <button 
-                    onClick={() => openAuthModal(false)}
-                    className={`w-full ${colors.button} text-white py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg hover:scale-105`}
+                  <Link 
+                    to="/company-form"
+                    className={`block text-center w-full ${colors.button} text-white py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg hover:scale-105`}
                   >
                     Get Started
-                  </button>
+                  </Link>
                 </div>
               );
             })}
@@ -514,9 +446,9 @@ export default function HomePage() {
                   <span className="text-lg">24/7 customer support</span>
                 </li>
               </ul>
-              <button onClick={() => openAuthModal(false)} className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl hover:scale-105">
+              <Link to="/company-form" className="inline-block bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl hover:scale-105">
                 Start Your Free Trial
-              </button>
+              </Link>
             </div>
             <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-12 text-center shadow-xl">
               <div className="flex justify-center mb-6">
@@ -657,44 +589,32 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* Auth Modal */}
-      {showAuthModal && (
+      {/* Login Modal */}
+      {showLoginModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
-              <button onClick={() => setShowAuthModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg">
+              <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
+              <button onClick={() => setShowLoginModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg">
                 <X size={24} />
               </button>
             </div>
             {Errors && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
-                {typeof Errors === 'string' ? Errors : (Errors.data || Errors.general || 'An error occurred')}
+                {Errors}
               </div>
             )}
-            <div className="space-y-4">
-              {!isLogin && (
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="Enter your email"
-                  />
-                </div>
-              )}
+            <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">Username</label>
+                <label className="block text-gray-700 font-semibold mb-2">Email</label>
                 <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
+                  type="email"
+                  name="email"
+                  value={loginData.email}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Enter your username"
+                  required
                 />
               </div>
               <div>
@@ -702,53 +622,33 @@ export default function HomePage() {
                 <input
                   type="password"
                   name="password"
-                  value={formData.password}
+                  value={loginData.password}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder={isLogin ? "Enter your password" : "Create a password"}
+                  placeholder="Enter your password"
+                  required
                 />
               </div>
-              {!isLogin && (
-                <div>
-                  <label className="block text-gray-700 font-semibold mb-2">Confirm Password</label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="Confirm your password"
-                  />
-                </div>
-              )}
-              {isLogin && (
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center cursor-pointer">
-                    <input type="checkbox" className="mr-2 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
-                    <span className="text-gray-600 text-sm">Remember me</span>
-                  </label>
-                  <a href="#" className="text-blue-600 text-sm hover:underline font-medium">Forgot password?</a>
-                </div>
-              )}
-              {!isLogin && (
-                <div className="flex items-start">
-                  <input type="checkbox" className="mr-3 mt-1 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
-                  <span className="text-gray-600 text-sm">I agree to the <a href="#" className="text-blue-600 hover:underline">Terms and Conditions</a> and <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a></span>
-                </div>
-              )}
+              <div className="flex items-center justify-between">
+                <label className="flex items-center cursor-pointer">
+                  <input type="checkbox" className="mr-2 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
+                  <span className="text-gray-600 text-sm">Remember me</span>
+                </label>
+                <a href="#" className="text-blue-600 text-sm hover:underline font-medium">Forgot password?</a>
+              </div>
               <button 
-                onClick={handleAuthSubmit} 
+                type="submit"
                 disabled={Loading}
                 className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {Loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
+                {Loading ? 'Signing In...' : 'Sign In'}
               </button>
-            </div>
+            </form>
             <p className="text-center mt-6 text-gray-600">
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <button onClick={() => setIsLogin(!isLogin)} className="text-blue-600 hover:underline font-semibold">
-                {isLogin ? 'Sign Up' : 'Sign In'}
-              </button>
+              Don't have an account?{' '}
+              <Link to="/company-form" onClick={() => setShowLoginModal(false)} className="text-blue-600 hover:underline font-semibold">
+                Sign Up
+              </Link>
             </p>
           </div>
         </div>

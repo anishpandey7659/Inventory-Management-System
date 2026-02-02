@@ -185,7 +185,7 @@ const Layout = ({ children }) => {
             </NavLink>
 
             <NavLink
-              to="/users"
+              to="/user-management"
               className={({ isActive }) =>
                 `w-full flex items-center gap-3 py-2.5 px-3 mb-1 border-none rounded-lg
                 text-[15px] font-medium cursor-pointer transition-all duration-200 text-left
