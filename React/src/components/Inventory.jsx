@@ -28,6 +28,7 @@ const InventoryPage = () => {
   const [productList, setProductList] = useState([]);
 
   const { data:categories, loading, error } = useFetch(getCategories, []);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [filters, setFilters] = useState({
     stock_status: "",
@@ -75,6 +76,14 @@ const InventoryPage = () => {
   useEffect(() => {
     fetchInventory(currentPage);
   }, [currentPage]);
+
+  const filteredProducts = inventoryData.filter((product) => {
+  const query = searchQuery.toLowerCase();
+  return (
+    product.name.toLowerCase().includes(query) ||
+    product.sku.toLowerCase().includes(query)
+  );
+});
 
   const handleDelete = async (itemId) => {
     if (window.confirm("Are you sure you want to delete this product?")) {

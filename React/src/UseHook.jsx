@@ -7,37 +7,40 @@ export const useFetch = (apiFunc, deps = []) => {
   const [error, setError] = useState(null);
 
   const fetchData = async () => {
-    setLoading(true);
-    setError(null);
+  setLoading(true);
+  setError(null);
 
-    try {
-      let allResults = [];
-      let response = await apiFunc(); // page 1
+  try {
+    let allResults = [];
+    let page = 1;
+    let keepGoing = true;
 
-      while (true) {
-        const resData = response.data;
+    while (keepGoing) {
+      const response = await apiFunc({}, page); // page 1, 2, 3...
+      const resData = response.data;
 
-        // DRF style
-        if (resData.results) {
-          allResults.push(...resData.results);
-          if (!resData.next) break;
+      // stop if unauthorized
+      if (resData.detail) throw new Error(resData.detail);
 
-          // fetch next page
-          response = await fetch(resData.next).then(r => r.json()).then(d => ({ data: d }));
-        } else {
-          // non-paginated API
-          allResults = resData;
-          break;
-        }
+      if (resData.results && resData.results.length > 0) {
+        allResults.push(...resData.results);
       }
 
-      setData(allResults);
-    } catch (err) {
-      setError(err?.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+      if (!resData.next) {
+        keepGoing = false;
+      } else {
+        page += 1; // go to next page
+      }
     }
-  };
+
+    setData(allResults);
+  } catch (err) {
+    setError(err?.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchData();

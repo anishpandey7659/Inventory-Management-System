@@ -44,7 +44,6 @@ useEffect(() => {
     try {
       const res = await products_grouped_by_category();
       const groupedData = res.data;
-
       setData(groupedData);
 
       // 🔢 Convert to array with percentage

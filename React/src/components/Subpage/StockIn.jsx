@@ -24,6 +24,7 @@ export default function StockInPage({isOpen, onClose,head}) {
 
   if (loading) return null;
   if (error) return null;
+  console.log("test: ",data);
   const productNames = data?.map(p => p.product_name);
 
 

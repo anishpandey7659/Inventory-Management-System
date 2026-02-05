@@ -610,7 +610,7 @@ export default function HomePage() {
                 <input
                   type="email"
                   name="email"
-                  value={loginData.email}
+                  value={loginData.email || ""}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Enter your username"

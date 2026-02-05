@@ -2,8 +2,7 @@ import BillingPage from "./components/Billingpage"
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from './components/Layout'
 import InventoryPage from './components/Inventory'  
-import Dashboard from './components/Dashboard'
-import Chatbot from './components/Chatbot'
+import Dashboard from './components/Dashboard'  
 import Reports from './components/Report'
 import BillingHistory from './components/Billinghistory'
 import ProfilePage from "./components/Profile";

@@ -37,27 +37,11 @@ const fetchInvoiceDetail = async (invoice) => {
   setLoadingDetail(true);
   try {
     const numericId = invoice.id.replace('INV-', '');
-    const url = `http://127.0.0.1:8000/api/v1/sales/${numericId}/`;
-    
     console.log('Invoice object:', invoice);
     console.log('numericId :', numericId );
-    
-    // const response = await fetch(url);
     const response = await getsalesId(numericId);
-
-    
     console.log('Response status:', response.status);
     console.log('Response data:', response.data);
-    
-    // if (!response.ok) {
-    //   const errorData = await response.json();
-    //   console.log('Error response:', errorData);
-    //   throw new Error(`HTTP error! status: ${response.status}`);
-    // }
-    
-    // const data = await response.json();
-  
-    // console.log('Fetched data:', data);
     setSelectedInvoiceDetail(response.data);
   
   } catch (error) {
@@ -67,17 +51,19 @@ const fetchInvoiceDetail = async (invoice) => {
     setLoadingDetail(false);
   }
 };
+if (loadingDetail){
+  return <h1>Loading billing</h1>
+}
 
+  const invoices = (data?.results ?? data ?? []).map(sale => ({
+    id: `INV-${sale.id}`,                      
+    customer: sale.customer_name,              
+    date:new Date(sale.date).toLocaleString("en-GB"),
 
-const invoices = (data?.results ?? data ?? []).map(sale => ({
-  id: `INV-${sale.id}`,                      
-  customer: sale.customer_name,              
-  date:new Date(sale.date).toLocaleString("en-GB"),
-
-  items: sale.items.length,                  
-  amount: Number(sale.total_amount),         
-  status: sale.status ?? "paid",             
-}));
+    items: sale.items.length,                  
+    amount: Number(sale.total_amount),         
+    status: sale.status ?? "paid",             
+  }));
 
   const totalCount =invoices .length
   const totalPages = Math.ceil(totalCount / pageSize);

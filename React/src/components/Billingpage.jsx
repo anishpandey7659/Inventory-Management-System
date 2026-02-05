@@ -22,20 +22,12 @@ const BillingCreate = () => {
     // Keep fetching while there is a next page
     while (true) {
       const response = await getProducts({}, page);
-
-      // Save total count only once (from first page)
       if (page === 1) {
         setTotalCount(response.data.count);
       }
-
       const data = response.data.results || response.data;
-
-      // Add results to allProducts
       allProducts = [...allProducts, ...data];
-
-      // Stop when there is no next page
       if (!response.data.next) break;
-
       page++;
     }
 

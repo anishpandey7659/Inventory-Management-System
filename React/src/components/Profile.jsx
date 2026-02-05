@@ -9,16 +9,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   
-  const [profileData, setProfileData] = useState({
-    name: 'John Doe',
-    email: 'john.doe@inventorypro.com',
-    phone: '+1 (555) 123-4567',
-    role: 'Admin',
-    department: 'Management',
-    location: 'New York, USA',
-    joinDate: 'January 15, 2023',
-    bio: 'Experienced inventory manager with a passion for optimizing supply chain processes and improving operational efficiency.'
-  });
+  const [profileData, setProfileData] = useState([]);
   useEffect(()=>{
     const fetchUserDetail =async()=>{
       try{
